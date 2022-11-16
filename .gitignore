@@ -1,0 +1,6 @@
+*.log
+*.exe
+*.txt
+*.html
+.vscode
+*.o
