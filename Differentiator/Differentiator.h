@@ -14,10 +14,10 @@ enum NODE_TYPES
 enum OPER_TYPES
 {
     UNDEF_OPER_TYPE = -1,
-    PLUS_OP = 0,
-    SUB_OP  = 1,
-    MUL_OP  = 2,
-    DIV_OP  = 3,
+    PLUS_OP         = 0,
+    SUB_OP          = 1,
+    MUL_OP          = 2,
+    DIV_OP          = 3,
 };
 
 struct Node_t 
@@ -41,7 +41,7 @@ const char DEFAULT_TREE_NAME[] = "Tree";
 
 int  SaveTreeInFile(Tree* tree, const char file_name[]);
 
-void GetNodeFromFile(Node* node, void* fp_void);
+void GetNodeFromFile(Node** new_node, FILE* fp);
 
 int  GetTreeFromFile(Tree* tree, const char file_name[]);
 

@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "../Logging/Logging.h"
 #include "../Errors.h"
@@ -18,7 +19,6 @@ typedef struct Node
     Node_t val   = {};
     Node*  left  = nullptr;
     Node*  right = nullptr;
-    Node*  prev  = nullptr;
 } Node;
 
 typedef void(*DFS_f)(Node* node, void*);
@@ -34,8 +34,8 @@ typedef struct LogInfo
 
 typedef struct Tree 
 {
-    Node*     root = nullptr;
-    LogInfo   debug     = {};
+    Node*   root = nullptr;
+    LogInfo debug     = {};
 }Tree;
 
 static int  TreeCheck(Tree* tree);

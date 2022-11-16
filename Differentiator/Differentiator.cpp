@@ -1,10 +1,33 @@
 #include <stdio.h>
+#include <assert.h>
 
 #include "Differentiator.h"
 
 #define DEBUG
 
+static void GetNodeValFromStr(const char str[], Node_t* val);
+
 static void PrintElem(FILE* stream, Node_t elem);
+
+#define PUT_PLUS                \
+    case PLUS_OP:               \
+        fprintf(stream, "+");   \
+        break;
+
+#define PUT_SUB                \
+    case SUB_OP:               \
+        fprintf(stream, "-");  \
+        break;
+        
+#define PUT_MUL                 \
+    case MUL_OP:                \
+        fprintf(stream, "*");   \
+        break;
+        
+#define PUT_DIV                \
+    case DIV_OP:               \
+        fprintf(stream, "/");  \
+        break;
 
 static void PrintElem(FILE* stream, Node_t elem)
 {
@@ -16,22 +39,26 @@ static void PrintElem(FILE* stream, Node_t elem)
     case TYPE_OP:
         switch(elem.val.op)
         {
-            case PLUS_OP:
-                fprintf(stream, "+");
+            PUT_PLUS
+            PUT_MUL
+            PUT_SUB
+            PUT_DIV
+            case UNDEF_OPER_TYPE:
+                fprintf(stream, "?");
                 break;
-            case SUB_OP:
-                fprintf(stream, "-");
-                break;
-            case MUL_OP:
-                fprintf(stream, "*");
-                break;
-            case DIV_OP:
-                fprintf(stream, "/");
+            default:
+                fprintf(stream, "#");
                 break;
         }
         break;
     case TYPE_NUM:
         fprintf(stream, "%lf", elem.val.dbl);        
+        break;
+    case UNDEF_NODE_TYPE:
+        fprintf(stream, "\n");
+        break;
+    default:
+        fprintf(stream, "\t");
         break;
     }
 }
@@ -52,18 +79,25 @@ int SaveTreeInFile(Tree* tree, const char file_name[])
     FILE* fp = fopen(file_name, "w");
     CHECK(fp == nullptr, "Error during open file", -1);
 
-    DFS_f pre_function = [](Node* node, void* dfs_fp)
+    DFS_f pre_function = [](Node*, void* dfs_fp)
                        {
                             fprintf((FILE*)dfs_fp, "(");
-                            PrintElem((FILE*)dfs_fp, node->val);
                        };
+
+    DFS_f in_function  = [](Node* node, void* dfs_fp)
+                        {
+                            PrintElem((FILE*)dfs_fp, node->val);
+                        };
+
     DFS_f post_function = [](Node*, void* dfs_fp)
                         {
                             fprintf((FILE*)dfs_fp, ")");
                         };
 
+    
+
     DFS(tree->root, pre_function,  fp,
-                    nullptr,       nullptr,
+                    in_function,   fp,
                     post_function, fp);
 
     fclose(fp);
@@ -71,129 +105,130 @@ int SaveTreeInFile(Tree* tree, const char file_name[])
     return 0;
 }
 
-void GetNodeFromFile(Node* node, void* fp_void)
+static void GetNodeValFromStr(const char str[], Node_t* val)
 {
-    FILE* fp = (FILE*)fp_void;
+    assert(val);
 
-    char new_str_object[MAX_STR_LEN] = "";
-
-    int c = getc(fp);
-    while(c != '(' && c != EOF)
-        c = getc(fp);
-
-    if (c == EOF) return;
-
-    while((c = getc(fp)) == ' ') 
-    {
-        if (c == EOF)
-            return;
-    };
-    ungetc(c, fp);
-
-    int i = 0;
-    while ((c = getc(fp)) != '(' && c != EOF && c != ')' && c != ' ')
-    {
-        new_str_object[i] = (char)c;
-        i++;
-    }
-    new_str_object[i] = '\0';
-
-    if (c == EOF) return;
-
-    printf("<%s>\n", new_str_object);
-
-    if (strcmp(new_str_object, "+") == 0)
+    if (strcmp(str, "+") == 0)
     {
         #ifdef DEBUG
             printf("plus\n");
         #endif
 
-        node->val.type   = TYPE_OP;
-        node->val.val.op = PLUS_OP; 
+        val->type   = TYPE_OP;
+        val->val.op = PLUS_OP; 
     }
-    else if (strcmp(new_str_object, "-") == 0)
+    else if (strcmp(str, "-") == 0)
     {
         #ifdef DEBUG
             printf("minus\n");
         #endif
-        node->val.type   = TYPE_OP;
-        node->val.val.op = SUB_OP;
+        val->type   = TYPE_OP;
+        val->val.op = SUB_OP;
     }
-    else if (strcmp(new_str_object, "*") == 0)
+    else if (strcmp(str, "*") == 0)
     {
         #ifdef DEBUG
             printf("mul\n");
         #endif
 
-        node->val.type   = TYPE_OP;
-        node->val.val.op = MUL_OP;
+        val->type   = TYPE_OP;
+        val->val.op = MUL_OP;
     }
-    else if (strcmp(new_str_object, "/") == 0)
+    else if (strcmp(str, "/") == 0)
     {
         #ifdef DEBUG
             printf("div\n");
         #endif
 
-        node->val.type   = TYPE_OP;
-        node->val.val.op = DIV_OP;
+        val->type   = TYPE_OP;
+        val->val.op = DIV_OP;
     }
-    else if (atof(new_str_object) == 0 && strcmp(new_str_object, "0"))
+    else if (atof(str) == 0 && strcmp(str, "0"))
     {
         #ifdef DEBUG
             printf("var\n");
         #endif
 
-        node->val.type    = TYPE_VAR;
+        val->type    = TYPE_VAR;
     
-        node->val.val.var = (char*)calloc(1, strlen(new_str_object));
-        strcpy(node->val.val.var, new_str_object);
+        val->val.var = (char*)calloc(1, strlen(str));
+        strcpy(val->val.var, str);
     }
     else
     {
-        #ifdef DEBUG
-            printf("atof = %lf\n", atof(new_str_object));
-        #endif
-
-        node->val.type    = TYPE_NUM;
-        node->val.val.dbl = atof(new_str_object);
+        val->type    = TYPE_NUM;
+        val->val.dbl = atof(str);
         
         #ifdef DEBUG
-            printf("num %lf\n", node->val.val.dbl);
+            printf("num %lf\n", val->val.dbl);
         #endif
     }
+}
 
-    while (c == ' ' && c != EOF)
-        c = getc(fp);
+void GetNodeFromFile(Node** node, FILE* fp)
+{
+    assert(node);
+    assert(fp);
 
-    if (c == EOF) return;
+    char c = 0;
+    fscanf(fp, "%c", &c);
 
     #ifdef DEBUG
         printf("c = <%c>%d\n", c, c);
     #endif
-    
+
     if (c == ')')
     {
-        node->left  = nullptr;
-        node->right = nullptr;
+        *node = nullptr;
+        printf("end node\n");
+        return;
+    }
+    else if (c == '(')
+    {
+        printf("new node\n");
+        Node* new_node = (Node*)calloc(sizeof(Node), 1);
+
+        assert(new_node);
+
+        new_node->left = nullptr;
+        new_node->right = nullptr;
+
+        printf("Go to left\n");
+        GetNodeFromFile(&(new_node->left), fp);
+        printf("End left\n");
+        
+        c = fgetc(fp);
+        if (c != ')' && c != '(')
+            ungetc(c, fp);
+
+        char new_object[MAX_STR_LEN] = "";
+        fscanf(fp, "%[^()\t\n ]", new_object);
+
+        printf("\nnew_object = <%s>\n", new_object);
+
+        GetNodeValFromStr(new_object, &(new_node)->val);
+
+        printf("\nGo to right\n");
+        GetNodeFromFile(&(new_node->right), fp);
+        printf("End right\n");
+
+        *node = new_node;
     }
     else
-    {
         ungetc(c, fp);
-        node->left  = (Node*)calloc(sizeof(Node), 1);
-        node->right = (Node*)calloc(sizeof(Node), 1);
-    }
 }
 
 int GetTreeFromFile(Tree* tree, const char file_name[])
 {
+    assert(tree);
+
     ReturnIfError(TreeCheck(tree));
 
     FILE* fp = fopen(file_name, "r");
     CHECK(fp == nullptr, "Error during open file", -1);
 
-    DFS(tree->root, GetNodeFromFile, fp,
-                    nullptr,         nullptr,
-                    nullptr,         nullptr);
+    GetNodeFromFile(&(tree->root), fp);
 
     fclose(fp);
 

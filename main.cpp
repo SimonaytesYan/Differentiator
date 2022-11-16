@@ -2,11 +2,13 @@
 
 int main()
 {
+    printf("Start main\n");
     OpenHtmlLogFile("Diff.log");
 
     Tree tree = {};
     TreeCtor(&tree);
     GetTreeFromFile(&tree, DEFAULT_TREE_NAME);
+    printf("Tree got\n");
 
     OutputGraphicDump(&tree);
     
@@ -14,4 +16,5 @@ int main()
     TreeDtor(&tree);
     
     CloseHtmlLogFile();
+    printf("End main\n");
 }
