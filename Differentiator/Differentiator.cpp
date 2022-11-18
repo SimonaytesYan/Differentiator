@@ -5,13 +5,13 @@
 
 #define DEBUG
 
-static void GetNodeValFromStr(const char str[], Node_t* val);
+//DSL
 
-static void PrintElem(FILE* stream, Node_t elem);
+#define IS_VAR(node) (node.type == TYPE_VAR)
 
-static void PrintfInLatexEndDoc(FILE* fp);
+#define IS_OP(node) (node.type == TYPE_OP)
 
-static void PrintInLatexStartDoc(FILE* fp);
+#define IS_NUM(node) (node.type == TYPE_NUM)
 
 #define VAL_N(node) node.val.dbl
 
@@ -38,6 +38,18 @@ static void PrintInLatexStartDoc(FILE* fp);
     case OP_DIV:               \
         fprintf(stream, " / ");  \
         break;
+
+//FUNCTION PROTOTIPES
+
+static void GetNodeValFromStr(const char str[], Node_t* val);
+
+static void PrintElem(FILE* stream, Node_t elem);
+
+static void PrintfInLatexEndDoc(FILE* fp);
+
+static void PrintInLatexStartDoc(FILE* fp);
+
+//FUNCTION IMPLEMENTATION
 
 int SaveTreeInFile(Tree* tree, const char file_name[])
 {
@@ -147,10 +159,10 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
     switch (node->val.type)
     {
     case TYPE_VAR:  
-        fprintf(stream, "%s", node->val.val.var);
+        fprintf(stream, "%s", VAL_VAR(val));
         break;
     case TYPE_OP:
-        switch(node->val.val.op)
+        switch(VAL_OP(val))
         {
             PUT_PLUS
             case OP_MUL:
@@ -169,7 +181,7 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
         }
         break;
     case TYPE_NUM:
-        fprintf(stream, "%lg", node->val.val.dbl);        
+        fprintf(stream, "%lg", VAL_N(val));
         break;
     case UNDEF_NODE_TYPE:
         fprintf(stream, "\n");
@@ -195,9 +207,9 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
                             FILE* stream = (FILE*)dfs_fp;
                             Node_t val = node->val;
                             
-                            if (val.type == TYPE_OP && VAL_OP(val) == OP_DIV)
+                            if (IS_OP(val) && VAL_OP(val) == OP_DIV)
                                 fprintf(stream, "\\frac{");
-                            else if (val.type != TYPE_NUM && val.type != TYPE_VAR)
+                            else if (!IS_NUM(val) && !IS_VAR(val))
                                 fprintf(stream, "(");
                        };
 
@@ -206,9 +218,9 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
                             FILE* stream = (FILE*)dfs_fp;
                             Node_t val = node->val;
 
-                            if (val.type == TYPE_OP && VAL_OP(val) == OP_DIV)
+                            if (IS_OP(val) && VAL_OP(val) == OP_DIV)
                                 fprintf(stream, "}");
-                            else if (val.type != TYPE_NUM && val.type != TYPE_VAR)
+                            else if (!IS_NUM(val) && !IS_VAR(val))
                                 fprintf(stream, ")");
                         };
 
