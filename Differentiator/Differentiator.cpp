@@ -13,24 +13,30 @@ static void PrintfInLatexEndDoc(FILE* fp);
 
 static void PrintInLatexStartDoc(FILE* fp);
 
+#define VAL_N(node) node.val.dbl
+
+#define VAL_OP(node) node.val.op
+
+#define VAL_VAR(node) node.val.var
+
 #define PUT_PLUS                \
-    case PLUS_OP:               \
-        fprintf(stream, "+");   \
+    case OP_PLUS:               \
+        fprintf(stream, " + ");   \
         break;
 
 #define PUT_SUB                \
-    case SUB_OP:               \
-        fprintf(stream, "-");  \
+    case OP_SUB:               \
+        fprintf(stream, " - ");  \
         break;
         
 #define PUT_MUL                 \
-    case MUL_OP:                \
-        fprintf(stream, "*");   \
+    case OP_MUL:                \
+        fprintf(stream, " * ");   \
         break;
         
 #define PUT_DIV                \
-    case DIV_OP:               \
-        fprintf(stream, "/");  \
+    case OP_DIV:               \
+        fprintf(stream, " / ");  \
         break;
 
 int SaveTreeInFile(Tree* tree, const char file_name[])
@@ -69,10 +75,10 @@ static void PrintElem(FILE* stream, Node_t elem)
     switch (elem.type)
     {
     case TYPE_VAR:  
-        fprintf(stream, "%s", elem.val.var);
+        fprintf(stream, "%s", VAL_VAR(elem));
         break;
     case TYPE_OP:
-        switch(elem.val.op)
+        switch(VAL_OP(elem))
         {
             PUT_PLUS
             PUT_MUL
@@ -87,7 +93,7 @@ static void PrintElem(FILE* stream, Node_t elem)
         }
         break;
     case TYPE_NUM:
-        fprintf(stream, "%lf", elem.val.dbl);        
+        fprintf(stream, "%lf", VAL_N(elem));
         break;
     case UNDEF_NODE_TYPE:
         fprintf(stream, "\n");
@@ -101,9 +107,9 @@ static void PrintElem(FILE* stream, Node_t elem)
 void PrintElemInLog(Node_t elem)
 {
     LogPrintf("type = %d\n" "{\n", elem.type);
-    LogPrintf("\tdbl  = %lf\n", elem.val.dbl);
-    LogPrintf("\top   = %d\n", elem.val.op);
-    LogPrintf("\tvar  = <%s?\n", elem.val.var);
+    LogPrintf("\tdbl  = %lf\n", VAL_N(elem));
+    LogPrintf("\top   = %d\n", VAL_OP(elem));
+    LogPrintf("\tvar  = <%s?\n", VAL_VAR(elem));
     LogPrintf("}\n");
 }
 
@@ -133,6 +139,47 @@ static void PrintfInLatexEndDoc(FILE* fp)
                 "\\end{document}");
 }
 
+static void PrintElemInLatex(Node* node, void* dfs_fp)
+{
+    FILE* stream = (FILE*)dfs_fp;
+    Node_t val = node->val;
+
+    switch (node->val.type)
+    {
+    case TYPE_VAR:  
+        fprintf(stream, "%s", node->val.val.var);
+        break;
+    case TYPE_OP:
+        switch(node->val.val.op)
+        {
+            PUT_PLUS
+            case OP_MUL:
+                fprintf(stream, " \\dot ");
+                break;
+            PUT_SUB
+            case OP_DIV:
+                fprintf(stream, "}{");
+                break;
+            case UNDEF_OPER_TYPE:
+                fprintf(stream, "?");
+                break;
+            default:
+                fprintf(stream, "#");
+                break;
+        }
+        break;
+    case TYPE_NUM:
+        fprintf(stream, "%lf", node->val.val.dbl);        
+        break;
+    case UNDEF_NODE_TYPE:
+        fprintf(stream, "\n");
+        break;
+    default:
+        fprintf(stream, "\t");
+        break;
+    }
+}
+
 int SaveTreeInLatex(Tree* tree, const char file_name[])
 {
     ReturnIfError(TreeCheck(tree));
@@ -145,65 +192,28 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
     DFS_f pre_function = [](Node* node, void* dfs_fp)
                        {
                             FILE* stream = (FILE*)dfs_fp;
+                            Node_t val = node->val;
                             
-                            if (node->val.type == TYPE_OP && node->val.val.op == DIV_OP)
+                            if (val.type == TYPE_OP && VAL_OP(val) == OP_DIV)
                                 fprintf(stream, "\\frac{");
-                            else
+                            else if (val.type != TYPE_NUM && val.type != TYPE_VAR)
                                 fprintf(stream, "(");
                        };
-
-    DFS_f in_function  = [](Node* node, void* dfs_fp)
-                        {
-                            FILE* stream = (FILE*)dfs_fp;
-                            switch (node->val.type)
-                            {
-                            case TYPE_VAR:  
-                                fprintf(stream, "%s", node->val.val.var);
-                                break;
-                            case TYPE_OP:
-                                switch(node->val.val.op)
-                                {
-                                    PUT_PLUS
-                                    case MUL_OP:
-                                        fprintf(stream, "\\dot");
-                                        break;
-                                    PUT_SUB
-                                    case DIV_OP:
-                                        fprintf(stream, "}{");
-                                        break;
-                                    case UNDEF_OPER_TYPE:
-                                        fprintf(stream, "?");
-                                        break;
-                                    default:
-                                        fprintf(stream, "#");
-                                        break;
-                                }
-                                break;
-                            case TYPE_NUM:
-                                fprintf(stream, "%lf", node->val.val.dbl);        
-                                break;
-                            case UNDEF_NODE_TYPE:
-                                fprintf(stream, "\n");
-                                break;
-                            default:
-                                fprintf(stream, "\t");
-                                break;
-                            }
-                        };
 
     DFS_f post_function = [](Node* node, void* dfs_fp)
                         {
                             FILE* stream = (FILE*)dfs_fp;
+                            Node_t val = node->val;
 
-                            if (node->val.type == TYPE_OP && node->val.val.op == DIV_OP)
+                            if (val.type == TYPE_OP && VAL_OP(val) == OP_DIV)
                                 fprintf(stream, "}");
-                            else
+                            else if (val.type != TYPE_NUM && val.type != TYPE_VAR)
                                 fprintf(stream, ")");
                         };
 
-    DFS(tree->root, pre_function,  fp,
-                    in_function,   fp,
-                    post_function, fp);
+    DFS(tree->root, pre_function,     fp,
+                    PrintElemInLatex, fp,
+                    post_function,    fp);
 
     PrintfInLatexEndDoc(fp);
 
@@ -223,7 +233,7 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         #endif
 
         val->type   = TYPE_OP;
-        val->val.op = PLUS_OP; 
+        val->val.op = OP_PLUS; 
     }
     else if (strcmp(str, "-") == 0)
     {
@@ -231,7 +241,7 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
             printf("minus\n");
         #endif
         val->type   = TYPE_OP;
-        val->val.op = SUB_OP;
+        val->val.op = OP_SUB;
     }
     else if (strcmp(str, "*") == 0)
     {
@@ -240,7 +250,7 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         #endif
 
         val->type   = TYPE_OP;
-        val->val.op = MUL_OP;
+        val->val.op = OP_MUL;
     }
     else if (strcmp(str, "/") == 0)
     {
@@ -249,7 +259,7 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         #endif
 
         val->type   = TYPE_OP;
-        val->val.op = DIV_OP;
+        val->val.op = OP_DIV;
     }
     else if (atof(str) == 0 && strcmp(str, "0"))
     {
@@ -278,8 +288,9 @@ void GetNodeFromFile(Node** node, FILE* fp)
     assert(node);
     assert(fp);
 
-    char c = 0;
-    fscanf(fp, "%c", &c);
+    int c = 0;
+    while((c = getc(fp)) == ' ' || c == '\n' || c == '\t')
+    {};
 
     #ifdef DEBUG
         printf("c = <%c>%d\n", c, c);
@@ -293,7 +304,10 @@ void GetNodeFromFile(Node** node, FILE* fp)
     }
     else if (c == '(')
     {
-        printf("new node\n");
+        #ifdef DEBUG
+            printf("new node\n");
+        #endif
+
         Node* new_node = (Node*)calloc(sizeof(Node), 1);
 
         assert(new_node);
@@ -301,9 +315,14 @@ void GetNodeFromFile(Node** node, FILE* fp)
         new_node->left = nullptr;
         new_node->right = nullptr;
 
-        printf("Go to left\n");
+        #ifdef DEBUG
+            printf("Go to left\n");
+        #endif
+
         GetNodeFromFile(&(new_node->left), fp);
-        printf("End left\n");
+        #ifdef DEBUG
+            printf("End left\n");
+        #endif
         
         while((c = fgetc(fp)) == ')' || c == '(' || c == ' ' || c == '\n' || c == '\t')
         {};
@@ -312,13 +331,19 @@ void GetNodeFromFile(Node** node, FILE* fp)
         char new_object[MAX_STR_LEN] = "";
         fscanf(fp, "%[^()\t\n ]", new_object);
 
-        printf("\nnew_object = <%s>\n", new_object);
+        #ifdef DEBUG
+            printf("\nnew_object = <%s>\n", new_object);
+        #endif
 
         GetNodeValFromStr(new_object, &(new_node)->val);
 
-        printf("\nGo to right\n");
+        #ifdef DEBUG
+            printf("\nGo to right\n");
+        #endif
         GetNodeFromFile(&(new_node->right), fp);
-        printf("End right\n");
+        #ifdef DEBUG
+            printf("End right\n");
+        #endif
 
         *node = new_node;
     }

@@ -14,10 +14,10 @@ enum NODE_TYPES
 enum OPER_TYPES
 {
     UNDEF_OPER_TYPE = -1,
-    PLUS_OP         = 0,
-    SUB_OP          = 1,
-    MUL_OP          = 2,
-    DIV_OP          = 3,
+    OP_PLUS         = 0,
+    OP_SUB          = 1,
+    OP_MUL          = 2,
+    OP_DIV          = 3,
 };
 
 struct Node_t 
