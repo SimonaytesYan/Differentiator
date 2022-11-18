@@ -93,7 +93,7 @@ static void PrintElem(FILE* stream, Node_t elem)
         }
         break;
     case TYPE_NUM:
-        fprintf(stream, "%lf", VAL_N(elem));
+        fprintf(stream, "%lg", VAL_N(elem));
         break;
     case UNDEF_NODE_TYPE:
         fprintf(stream, "\n");
@@ -107,7 +107,7 @@ static void PrintElem(FILE* stream, Node_t elem)
 void PrintElemInLog(Node_t elem)
 {
     LogPrintf("type = %d\n" "{\n", elem.type);
-    LogPrintf("\tdbl  = %lf\n", VAL_N(elem));
+    LogPrintf("\tdbl  = %lg\n", VAL_N(elem));
     LogPrintf("\top   = %d\n", VAL_OP(elem));
     LogPrintf("\tvar  = <%s?\n", VAL_VAR(elem));
     LogPrintf("}\n");
@@ -154,7 +154,7 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
         {
             PUT_PLUS
             case OP_MUL:
-                fprintf(stream, " \\dot ");
+                fprintf(stream, " \\cdot ");
                 break;
             PUT_SUB
             case OP_DIV:
@@ -169,7 +169,7 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
         }
         break;
     case TYPE_NUM:
-        fprintf(stream, "%lf", node->val.val.dbl);        
+        fprintf(stream, "%lg", node->val.val.dbl);        
         break;
     case UNDEF_NODE_TYPE:
         fprintf(stream, "\n");
@@ -188,6 +188,7 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
     CHECK(fp == nullptr, "Error during open file", -1);
     
     PrintInLatexStartDoc(fp);
+    fprintf(fp, "$$");
 
     DFS_f pre_function = [](Node* node, void* dfs_fp)
                        {
@@ -215,6 +216,7 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
                     PrintElemInLatex, fp,
                     post_function,    fp);
 
+    fprintf(fp, "$$");
     PrintfInLatexEndDoc(fp);
 
     fclose(fp);
@@ -278,7 +280,7 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         val->val.dbl = atof(str);
         
         #ifdef DEBUG
-            printf("num %lf\n", val->val.dbl);
+            printf("num %lg\n", val->val.dbl);
         #endif
     }
 }
