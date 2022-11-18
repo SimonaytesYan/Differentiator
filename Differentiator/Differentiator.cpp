@@ -198,9 +198,9 @@ void GetNodeFromFile(Node** node, FILE* fp)
         GetNodeFromFile(&(new_node->left), fp);
         printf("End left\n");
         
-        c = fgetc(fp);
-        if (c != ')' && c != '(')
-            ungetc(c, fp);
+        while((c = fgetc(fp)) == ')' || c == '(' || c == ' ' || c == '\n' || c == '\t')
+        {};
+        ungetc(c, fp);
 
         char new_object[MAX_STR_LEN] = "";
         fscanf(fp, "%[^()\t\n ]", new_object);
