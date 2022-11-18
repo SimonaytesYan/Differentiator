@@ -9,6 +9,10 @@ static void GetNodeValFromStr(const char str[], Node_t* val);
 
 static void PrintElem(FILE* stream, Node_t elem);
 
+static void PrintfInLatexEndDoc(FILE* fp);
+
+static void PrintInLatexStartDoc(FILE* fp);
+
 #define PUT_PLUS                \
     case PLUS_OP:               \
         fprintf(stream, "+");   \
@@ -103,30 +107,40 @@ void PrintElemInLog(Node_t elem)
     LogPrintf("}\n");
 }
 
+static void PrintInLatexStartDoc(FILE* fp)
+{
+    fprintf(fp, "\\documentclass[12pt,a4paper,fleqn]{article}\n"
+                "\\usepackage[utf8]{inputenc}\n"
+                "\\usepackage[russian]{babel}\n"
+                "\\usepackage{amssymb, amsmath, multicol}\n"
+                "\\usepackage{enumitem}\n"
+                "\\usepackage{lipsum}\n"
+                "\\usepackage{euler}\n"
+                "\\oddsidemargin=-15.4mm\n"
+                "\\textwidth=190mm\n"
+                "\\headheight=-32.4mm\n"
+                "\\textheight=277mm\n"
+                "\\parindent=0pt\n"
+                "\\parskip=8pt\n"
+                "\\pagestyle{empty}\n"
+                "\\begin{document}\n"
+                );
+}
+
+static void PrintfInLatexEndDoc(FILE* fp)
+{
+    fprintf(fp, "\n"
+                "\\end{document}");
+}
+
 int SaveTreeInLatex(Tree* tree, const char file_name[])
 {
     ReturnIfError(TreeCheck(tree));
 
     FILE* fp = fopen(file_name, "w");
     CHECK(fp == nullptr, "Error during open file", -1);
-
-    fprintf(fp, "\\documentclass[12pt,a4paper,fleqn]{article}\n"
-                 "\\usepackage[utf8]{inputenc}\n"
-                 "\\usepackage[russian]{babel}\n"
-                 "\\usepackage{amssymb, amsmath, multicol}\n"
-                 "\\usepackage{enumitem}\n"
-                 "\\usepackage{lipsum}\n"
-                 "\\usepackage{euler}\n"
-                 "\\oddsidemargin=-15.4mm\n"
-                 "\\textwidth=190mm\n"
-                 "\\headheight=-32.4mm\n"
-                 "\\textheight=277mm\n"
-                 "\\parindent=0pt\n"
-                 "\\parskip=8pt\n"
-                 "\\pagestyle{empty}\n"
-                 "\\begin{document}\n"
-                 "\t$$"
-                 );
+    
+    PrintInLatexStartDoc(fp);
 
     DFS_f pre_function = [](Node* node, void* dfs_fp)
                        {
@@ -191,8 +205,7 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
                     in_function,   fp,
                     post_function, fp);
 
-    fprintf(fp, "\t$$\n"
-                "\\end{document}");
+    PrintfInLatexEndDoc(fp);
 
     fclose(fp);
 
