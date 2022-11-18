@@ -13,6 +13,7 @@ int main()
     OutputGraphicDump(&tree);
     
     SaveTreeInFile(&tree, DEFAULT_TREE_NAME);
+    SaveTreeInLatex(&tree, "Zorich_3_volume.tex");
     TreeDtor(&tree);
     
     CloseHtmlLogFile();

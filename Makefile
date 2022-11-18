@@ -2,7 +2,7 @@ C_FLAGS_LINUX   = -D _DEBUG -ggdb3 -std=c++2a -O0 -Wall -Wextra -Weffc++ -Waggre
 C_FLAGS_WINDOWS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
 
 windows: differentiator_windows logging_windows
-	g++ main.cpp Obj/Differentiator.o Obj/Logging.o $(C_FLAGS_WINDOWS)
+	g++ main.cpp Obj/Differentiator.o Obj/Logging.o $(C_FLAGS_WINDOWS) -o Exe/Start.exe
 
 differentiator_windows:
 	g++ -c Differentiator/Differentiator.cpp $(C_FLAGS_WINDOWS) -o Obj/Differentiator.o

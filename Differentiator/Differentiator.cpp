@@ -29,6 +29,37 @@ static void PrintElem(FILE* stream, Node_t elem);
         fprintf(stream, "/");  \
         break;
 
+int SaveTreeInFile(Tree* tree, const char file_name[])
+{
+    ReturnIfError(TreeCheck(tree));
+
+    FILE* fp = fopen(file_name, "w");
+    CHECK(fp == nullptr, "Error during open file", -1);
+
+    DFS_f pre_function = [](Node*, void* dfs_fp)
+                       {
+                            fprintf((FILE*)dfs_fp, "(");
+                       };
+
+    DFS_f in_function  = [](Node* node, void* dfs_fp)
+                        {
+                            PrintElem((FILE*)dfs_fp, node->val);
+                        };
+
+    DFS_f post_function = [](Node*, void* dfs_fp)
+                        {
+                            fprintf((FILE*)dfs_fp, ")");
+                        };
+
+    DFS(tree->root, pre_function,  fp,
+                    in_function,   fp,
+                    post_function, fp);
+
+    fclose(fp);
+
+    return 0;
+}
+
 static void PrintElem(FILE* stream, Node_t elem)
 {
     switch (elem.type)
@@ -72,33 +103,96 @@ void PrintElemInLog(Node_t elem)
     LogPrintf("}\n");
 }
 
-int SaveTreeInFile(Tree* tree, const char file_name[])
+int SaveTreeInLatex(Tree* tree, const char file_name[])
 {
     ReturnIfError(TreeCheck(tree));
 
     FILE* fp = fopen(file_name, "w");
     CHECK(fp == nullptr, "Error during open file", -1);
 
-    DFS_f pre_function = [](Node*, void* dfs_fp)
+    fprintf(fp, "\\documentclass[12pt,a4paper,fleqn]{article}\n"
+                 "\\usepackage[utf8]{inputenc}\n"
+                 "\\usepackage[russian]{babel}\n"
+                 "\\usepackage{amssymb, amsmath, multicol}\n"
+                 "\\usepackage{enumitem}\n"
+                 "\\usepackage{lipsum}\n"
+                 "\\usepackage{euler}\n"
+                 "\\oddsidemargin=-15.4mm\n"
+                 "\\textwidth=190mm\n"
+                 "\\headheight=-32.4mm\n"
+                 "\\textheight=277mm\n"
+                 "\\parindent=0pt\n"
+                 "\\parskip=8pt\n"
+                 "\\pagestyle{empty}\n"
+                 "\\begin{document}\n"
+                 "\t$$"
+                 );
+
+    DFS_f pre_function = [](Node* node, void* dfs_fp)
                        {
-                            fprintf((FILE*)dfs_fp, "(");
+                            FILE* stream = (FILE*)dfs_fp;
+                            
+                            if (node->val.type == TYPE_OP && node->val.val.op == DIV_OP)
+                                fprintf(stream, "\\frac{");
+                            else
+                                fprintf(stream, "(");
                        };
 
     DFS_f in_function  = [](Node* node, void* dfs_fp)
                         {
-                            PrintElem((FILE*)dfs_fp, node->val);
+                            FILE* stream = (FILE*)dfs_fp;
+                            switch (node->val.type)
+                            {
+                            case TYPE_VAR:  
+                                fprintf(stream, "%s", node->val.val.var);
+                                break;
+                            case TYPE_OP:
+                                switch(node->val.val.op)
+                                {
+                                    PUT_PLUS
+                                    case MUL_OP:
+                                        fprintf(stream, "\\dot");
+                                        break;
+                                    PUT_SUB
+                                    case DIV_OP:
+                                        fprintf(stream, "}{");
+                                        break;
+                                    case UNDEF_OPER_TYPE:
+                                        fprintf(stream, "?");
+                                        break;
+                                    default:
+                                        fprintf(stream, "#");
+                                        break;
+                                }
+                                break;
+                            case TYPE_NUM:
+                                fprintf(stream, "%lf", node->val.val.dbl);        
+                                break;
+                            case UNDEF_NODE_TYPE:
+                                fprintf(stream, "\n");
+                                break;
+                            default:
+                                fprintf(stream, "\t");
+                                break;
+                            }
                         };
 
-    DFS_f post_function = [](Node*, void* dfs_fp)
+    DFS_f post_function = [](Node* node, void* dfs_fp)
                         {
-                            fprintf((FILE*)dfs_fp, ")");
-                        };
+                            FILE* stream = (FILE*)dfs_fp;
 
-    
+                            if (node->val.type == TYPE_OP && node->val.val.op == DIV_OP)
+                                fprintf(stream, "}");
+                            else
+                                fprintf(stream, ")");
+                        };
 
     DFS(tree->root, pre_function,  fp,
                     in_function,   fp,
                     post_function, fp);
+
+    fprintf(fp, "\t$$\n"
+                "\\end{document}");
 
     fclose(fp);
 
