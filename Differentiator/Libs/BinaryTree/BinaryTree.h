@@ -95,8 +95,8 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
 
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat"
-    fprintf(fp, "Node%06X[style = \"filled,rounded\", fillcolor = \"#B1FF9F\", label = \"{<i>%06X \\n | { <v>%d | %lf \\n | %d | %s } | { <l> %06X  |<r>  %06X}}\"]\n",
-                node,                                                                   node, node->val.type, node->val.val.dbl , node->val.val.op, node->val.val.var, node->left, node->right);
+    fprintf(fp, "Node%06X[style = \"filled,rounded\", fillcolor = \"#B1FF9F\", label = \"{<i>%06X \\n | { <v>%d | %s \\n | %d |%lf } | { <l> %06X  |<r>  %06X}}\"]\n",
+                node,                                                                   node, node->val.type, node->val.val.var, node->val.val.op, node->val.val.dbl, node->left, node->right);
     
     if (node->left != nullptr)
         fprintf(fp, "Node%06X -> Node%06X[xlabel = \"Да\"]\n", node, node->left);
@@ -107,6 +107,8 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
 
 static void GraphicDump(Tree* tree)
 {
+    assert(tree);
+
     char name[30] = "";
     sprintf(name, "GraphicDumps/dump%d", GRAPHIC_DUMP_CNT);
     FILE* fp = fopen(name, "w");
@@ -114,9 +116,6 @@ static void GraphicDump(Tree* tree)
     fprintf(fp, "digraph G{\n");
     fprintf(fp, "node[shape = record, fontsize = 14];\n");
     fprintf(fp, "splines = ortho\n");
-
-    if (tree == nullptr)
-        return;
 
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat"
@@ -126,7 +125,7 @@ static void GraphicDump(Tree* tree)
     DFS(tree->root, WriteNodeAndEdge, fp, 
                     nullptr,          nullptr,
                     nullptr,          nullptr);
-    
+
     fprintf(fp, "}");
 
     fclose(fp);

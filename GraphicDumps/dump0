@@ -1,18 +1,10 @@
 digraph G{
 node[shape = record, fontsize = 14];
 splines = ortho
-info[label = "root = 0x711490"]
-Node711490[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>711490 \n | { <v>1 | 0.000000 \n | 2 | (null) } | { <l> 7114D0  |<r>  7115B0}}"]
-Node711490 -> Node7114D0[xlabel = "Да"]
-Node711490 -> Node7115B0[xlabel = "Нет"]
-Node7114D0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7114D0 \n | { <v>1 | 0.000000 \n | 0 | (null) } | { <l> 711510  |<r>  711570}}"]
-Node7114D0 -> Node711510[xlabel = "Да"]
-Node7114D0 -> Node711570[xlabel = "Нет"]
-Node711510[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>711510 \n | { <v>0 | 0.000000 \n | 0 | x } | { <l> 000000  |<r>  000000}}"]
-Node711570[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>711570 \n | { <v>2 | 5.000000 \n | 0 | (null) } | { <l> 000000  |<r>  000000}}"]
-Node7115B0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7115B0 \n | { <v>1 | 0.000000 \n | 3 | (null) } | { <l> 7115F0  |<r>  711630}}"]
-Node7115B0 -> Node7115F0[xlabel = "Да"]
-Node7115B0 -> Node711630[xlabel = "Нет"]
-Node7115F0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7115F0 \n | { <v>2 | 6.000000 \n | 0 | (null) } | { <l> 000000  |<r>  000000}}"]
-Node711630[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>711630 \n | { <v>2 | 4.000000 \n | 0 | (null) } | { <l> 000000  |<r>  000000}}"]
+info[label = "root = 0xD614F0"]
+NodeD614F0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>D614F0 \n | { <v>1 | (null) \n | 2 |0.000000 } | { <l> D61530  |<r>  D61590}}"]
+NodeD614F0 -> NodeD61530[xlabel = "Да"]
+NodeD614F0 -> NodeD61590[xlabel = "Нет"]
+NodeD61530[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>D61530 \n | { <v>0 | x \n | 0 |0.000000 } | { <l> 000000  |<r>  000000}}"]
+NodeD61590[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>D61590 \n | { <v>2 | (null) \n | 0 |1.000000 } | { <l> 000000  |<r>  000000}}"]
 }

@@ -161,7 +161,10 @@ Node* Diff(Node* node_arg)
     Node_t node = node_arg->val;
 
     if (IS_NUM(node))
+    {
+        printf("0\n");
         return NodeCtorNum(0);
+    }
 
     if (IS_VAR(node))
         return NodeCtorNum(1);
@@ -560,6 +563,8 @@ int GetTreeFromFile(Tree* tree, const char file_name[])
 
 void OutputGraphicDump(Tree* tree)
 {
+    assert(tree);
+
     GraphicDump(tree);
 
     char graphic_dump_file[70] = "";

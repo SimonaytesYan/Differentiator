@@ -16,8 +16,10 @@ int main()
     TreeCtor(&DTree);
 
     DTree.root = Diff(tree.root);
+    printf("End diff\n");
 
     OutputGraphicDump(&DTree);
+    printf("End out\n");
     
     SaveTreeInFile(&tree, DEFAULT_TREE_NAME);
     SaveTreeInLatex(&tree, "Zorich_3_volume.tex");
