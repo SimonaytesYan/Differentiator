@@ -7,6 +7,19 @@
 
 //DSL
 
+#define L(node) node->left
+
+#define R(node) node->right
+
+#define LL(node) node->left->left
+
+#define LR(node) node->left->right
+
+#define RL(node) node->right->left
+
+#define RR(node) node->right->right
+
+
 #define IS_VAR(node) (node.type == TYPE_VAR)
 
 #define IS_OP(node) (node.type == TYPE_OP)
@@ -49,7 +62,144 @@ static void PrintfInLatexEndDoc(FILE* fp);
 
 static void PrintInLatexStartDoc(FILE* fp);
 
+static Node* NodeCtorNum(double val);
+
+static Node* NodeCtorVar(char* val);
+
+static Node* NodeCtorOp(OPER_TYPES val);
+
 //FUNCTION IMPLEMENTATION
+
+static Node* NodeCtorNum(double val)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    Node_t node_val  = {};
+    node_val.type    = TYPE_NUM;
+    node_val.val.dbl = val;
+
+    NodeCtor(new_node, node_val);
+
+    return new_node;
+}
+
+static Node* NodeCtorVar(char* val)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    Node_t node_val  = {};
+    node_val.type    = TYPE_VAR;
+    node_val.val.var = val;
+
+    NodeCtor(new_node, node_val);
+
+    return new_node;
+}
+
+static Node* NodeCtorOp(OPER_TYPES val)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    Node_t node_val  = {};
+    node_val.type    = TYPE_OP;
+    node_val.val.op  = val;
+
+    NodeCtor(new_node, node_val);
+
+    return new_node;
+}
+
+Node* Diff(Node* node_arg)
+{
+    assert(node_arg);
+    Node_t node = node_arg->val;
+
+    if (IS_NUM(node))
+        return NodeCtorNum(0);
+
+    if (IS_VAR(node))
+        return NodeCtorNum(1);
+
+    if (IS_OP(node))
+    {
+        switch (VAL_OP(node))
+        {
+        case OP_PLUS:
+        {
+            Node* new_node  = NodeCtorOp(OP_PLUS);
+
+            new_node->left  = Diff(node_arg->left);
+            new_node->right = Diff(node_arg->right);
+
+            return new_node;
+        }
+        case OP_SUB:
+        {
+            Node* new_node  = NodeCtorOp(OP_SUB);
+
+            new_node->left  = Diff(node_arg->left);
+            new_node->right = Diff(node_arg->right);
+            
+            return new_node;
+        }
+        case OP_MUL:
+        {
+            Node* new_node   = NodeCtorOp(OP_PLUS);
+            Node* left_node  = NodeCtorOp(OP_MUL);
+            Node* right_node = NodeCtorOp(OP_MUL);
+
+            L(new_node) = left_node;
+            R(new_node) = right_node;
+
+            LL(new_node) = Diff(L(node_arg));
+            LR(new_node) = Cpy(R(node_arg));
+
+            RL(new_node) = Cpy(L(node_arg));
+            RR(new_node) = Diff(R(node_arg));
+            
+            return new_node;
+        }
+        case OP_DIV:
+        {
+            Node* new_node   = NodeCtorOp(OP_PLUS);
+            Node* left_node  = NodeCtorOp(OP_SUB);
+            Node* right_node = NodeCtorOp(OP_MUL);
+
+            L(new_node) = left_node;
+            R(new_node) = right_node;
+
+            LL(new_node) = NodeCtorOp(OP_MUL); 
+            LR(new_node) = NodeCtorOp(OP_MUL);
+
+            L(LL(new_node)) = Diff(L(node_arg));
+            R(LL(new_node)) = Cpy(R(new_node));
+            
+            L(LR(new_node)) = Diff(R(node_arg));
+            R(LR(new_node)) = Cpy(L(new_node));
+ 
+            RR(new_node) = Cpy(R(node_arg));
+            RR(new_node) = Cpy(R(node_arg));
+            
+            return new_node;
+        }
+            break;
+        
+        default:
+            return nullptr;
+        }
+    }
+}
+
+Node* Cpy(Node* node)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    new_node->val   = node->val;
+    new_node->left  = node->left;
+    new_node->right = node->right;
+
+    return new_node;
+}
 
 int SaveTreeInFile(Tree* tree, const char file_name[])
 {

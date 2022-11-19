@@ -47,7 +47,10 @@ int  GetTreeFromFile(Tree* tree, const char file_name[]);
 
 void OutputGraphicDump(Tree* tree);
 
-int SaveTreeInLatex(Tree* tree, const char file_name[]);
+int  SaveTreeInLatex(Tree* tree, const char file_name[]);
 
+Node* Diff(Node* node);
+
+Node* Cpy(Node* node);
 
 #endif //__DIFFERENTIATOR_SYM__

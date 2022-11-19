@@ -40,6 +40,8 @@ typedef struct Tree
 
 static int  TreeCheck(Tree* tree);
 
+static int  NodeCtor(Node* node, Node_t val);
+
 static int  TreeConstructor(Tree* tree, int capacity, int line, const char* name, const char* function, const char* file);
 
 static int  TreeDtor(Tree* tree);
@@ -75,6 +77,16 @@ static void DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* ar
         post_func(node, args3);
 }
 
+static int NodeCtor(Node* node, Node_t val)
+{
+    assert(node);
+
+    node->val   = val;
+    node->left  = nullptr;
+    node->right = nullptr;
+
+    return 0;
+}
 
 static void WriteNodeAndEdge(Node* node, void* fp_void)
 { 
