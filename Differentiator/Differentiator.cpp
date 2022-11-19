@@ -68,6 +68,10 @@ static Node* NodeCtorVar(char* val);
 
 static Node* NodeCtorOp(OPER_TYPES val);
 
+static Node* DiffDiv(Node* node_arg);
+
+static Node* DiffMult(Node* node_arg);
+
 //FUNCTION IMPLEMENTATION
 
 static Node* NodeCtorNum(double val)
@@ -109,6 +113,48 @@ static Node* NodeCtorOp(OPER_TYPES val)
     return new_node;
 }
 
+Node* DiffDiv(Node* node_arg)
+{
+    Node* new_node   = NodeCtorOp(OP_PLUS);
+    Node* left_node  = NodeCtorOp(OP_SUB);
+    Node* right_node = NodeCtorOp(OP_MUL);
+
+    L(new_node) = left_node;
+    R(new_node) = right_node;
+
+    LL(new_node) = NodeCtorOp(OP_MUL); 
+    LR(new_node) = NodeCtorOp(OP_MUL);
+
+    L(LL(new_node)) = Diff(L(node_arg));
+    R(LL(new_node)) = Cpy(R(new_node));
+            
+    L(LR(new_node)) = Diff(R(node_arg));
+    R(LR(new_node)) = Cpy(L(new_node));
+
+    RR(new_node) = Cpy(R(node_arg));
+    RR(new_node) = Cpy(R(node_arg));
+
+    return new_node;
+}
+
+Node* DiffMult(Node* node_arg)
+{
+    Node* new_node   = NodeCtorOp(OP_PLUS);
+    Node* left_node  = NodeCtorOp(OP_MUL);
+    Node* right_node = NodeCtorOp(OP_MUL);
+
+    L(new_node) = left_node;
+    R(new_node) = right_node;
+
+    LL(new_node) = Diff(L(node_arg));
+    LR(new_node) = Cpy(R(node_arg));
+
+    RL(new_node) = Cpy(L(node_arg));
+    RR(new_node) = Diff(R(node_arg));
+
+    return new_node;
+}
+
 Node* Diff(Node* node_arg)
 {
     assert(node_arg);
@@ -144,50 +190,31 @@ Node* Diff(Node* node_arg)
         }
         case OP_MUL:
         {
-            Node* new_node   = NodeCtorOp(OP_PLUS);
-            Node* left_node  = NodeCtorOp(OP_MUL);
-            Node* right_node = NodeCtorOp(OP_MUL);
-
-            L(new_node) = left_node;
-            R(new_node) = right_node;
-
-            LL(new_node) = Diff(L(node_arg));
-            LR(new_node) = Cpy(R(node_arg));
-
-            RL(new_node) = Cpy(L(node_arg));
-            RR(new_node) = Diff(R(node_arg));
-            
-            return new_node;
+            return DiffMult(node_arg);
         }
         case OP_DIV:
         {
-            Node* new_node   = NodeCtorOp(OP_PLUS);
-            Node* left_node  = NodeCtorOp(OP_SUB);
-            Node* right_node = NodeCtorOp(OP_MUL);
-
-            L(new_node) = left_node;
-            R(new_node) = right_node;
-
-            LL(new_node) = NodeCtorOp(OP_MUL); 
-            LR(new_node) = NodeCtorOp(OP_MUL);
-
-            L(LL(new_node)) = Diff(L(node_arg));
-            R(LL(new_node)) = Cpy(R(new_node));
-            
-            L(LR(new_node)) = Diff(R(node_arg));
-            R(LR(new_node)) = Cpy(L(new_node));
- 
-            RR(new_node) = Cpy(R(node_arg));
-            RR(new_node) = Cpy(R(node_arg));
-            
-            return new_node;
+            return DiffDiv(node_arg);
         }
-            break;
-        
-        default:
+
+        case UNDEF_OPER_TYPE:
+        {
+            LogPrintf("Undefined operation type while diff\n");
             return nullptr;
         }
+        
+        default:
+        {
+            LogPrintf("Unknown operation type while diff\n"
+                      "Operation type = %d", VAL_OP(node));            
+            return nullptr;
+        }
+        }
     }
+
+    LogPrintf("Unknown node type\n"
+              "Node type = %d\n", node.type);
+    return nullptr;
 }
 
 Node* Cpy(Node* node)
