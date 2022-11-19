@@ -20,10 +20,14 @@ int main()
 
     OutputGraphicDump(&DTree);
     printf("End out\n");
+
+    OutputGraphicDump(&tree);
     
     SaveTreeInFile(&tree, DEFAULT_TREE_NAME);
-    SaveTreeInLatex(&tree, "Zorich_3_volume.tex");
+    SaveTreeInLatex(&DTree, "Zorich_3_volume.tex");
+
     TreeDtor(&tree);
+    TreeDtor(&DTree);
     
     CloseHtmlLogFile();
     printf("End main\n");

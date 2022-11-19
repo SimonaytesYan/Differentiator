@@ -115,24 +115,22 @@ static Node* NodeCtorOp(OPER_TYPES val)
 
 Node* DiffDiv(Node* node_arg)
 {
-    Node* new_node   = NodeCtorOp(OP_PLUS);
-    Node* left_node  = NodeCtorOp(OP_SUB);
-    Node* right_node = NodeCtorOp(OP_MUL);
+    Node* new_node = NodeCtorOp(OP_DIV);
 
-    L(new_node) = left_node;
-    R(new_node) = right_node;
+    L(new_node) = NodeCtorOp(OP_SUB);
+    R(new_node) = NodeCtorOp(OP_MUL);
 
     LL(new_node) = NodeCtorOp(OP_MUL); 
     LR(new_node) = NodeCtorOp(OP_MUL);
 
     L(LL(new_node)) = Diff(L(node_arg));
-    R(LL(new_node)) = Cpy(R(new_node));
+    R(LL(new_node)) = Cpy(R(node_arg));
             
     L(LR(new_node)) = Diff(R(node_arg));
-    R(LR(new_node)) = Cpy(L(new_node));
+    R(LR(new_node)) = Cpy(L(node_arg));
 
     RR(new_node) = Cpy(R(node_arg));
-    RR(new_node) = Cpy(R(node_arg));
+    RL(new_node) = Cpy(R(node_arg));
 
     return new_node;
 }
@@ -162,7 +160,6 @@ Node* Diff(Node* node_arg)
 
     if (IS_NUM(node))
     {
-        printf("0\n");
         return NodeCtorNum(0);
     }
 
@@ -222,11 +219,19 @@ Node* Diff(Node* node_arg)
 
 Node* Cpy(Node* node)
 {
+    if (node == nullptr)
+        return nullptr;
+    PrintElem(stdout, node->val);
+
+    printf(" node = %p\nleft = %p\nright = %p\n", node, L(node), R(node));
+
     Node* new_node = (Node*)calloc(1, sizeof(Node));
 
-    new_node->val   = node->val;
-    new_node->left  = node->left;
-    new_node->right = node->right;
+    new_node->val.type = node->val.type;
+    new_node->val.val  = node->val.val;
+
+    new_node->left     = Cpy(node->left);
+    new_node->right    = Cpy(node->right);
 
     return new_node;
 }
