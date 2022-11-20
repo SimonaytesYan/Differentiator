@@ -31,26 +31,35 @@
 
 #define VAL_VAR(node) node.val.var
 
-#define PUT_PLUS                \
-    case OP_PLUS:               \
-        fprintf(stream, " + ");   \
+#define PUT_PLUS                    \
+    case OP_PLUS:                   \
+        fprintf(stream, " + ");     \
         break;
 
-#define PUT_SUB                \
-    case OP_SUB:               \
-        fprintf(stream, " - ");  \
+#define PUT_SUB                     \
+    case OP_SUB:                    \
+        fprintf(stream, " - ");     \
         break;
         
-#define PUT_MUL                 \
-    case OP_MUL:                \
-        fprintf(stream, " * ");   \
+#define PUT_MUL                     \
+    case OP_MUL:                    \
+        fprintf(stream, " * ");     \
         break;
         
-#define PUT_DIV                \
-    case OP_DIV:               \
-        fprintf(stream, " / ");  \
+#define PUT_DIV                     \
+    case OP_DIV:                    \
+        fprintf(stream, " / ");     \
         break;
 
+#define PUT_SIN                     \
+    case OP_SIN:                    \
+        fprintf(stream, " s ");     \
+        break;
+
+#define PUT_COS                     \
+    case OP_COS:                    \
+        fprintf(stream, " c ");     \
+        break;
 
 static FILE* LatexFp = nullptr;
 
@@ -227,7 +236,7 @@ Node* Diff(Node* node_arg)
             
         case OP_SIN:
             return DiffSin(node_arg);
-            
+
         case OP_COS:
             return DiffCos(node_arg);
 
@@ -315,6 +324,9 @@ static void PrintElem(FILE* stream, Node_t elem)
             PUT_MUL
             PUT_SUB
             PUT_DIV
+            PUT_SIN
+            PUT_COS
+
             case UNDEF_OPER_TYPE:
                 fprintf(stream, "?");
                 break;
@@ -384,16 +396,28 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
         switch(VAL_OP(val))
         {
             PUT_PLUS
+            PUT_SUB
+
+            case OP_SIN:
+                fprintf(stream, "sin(");
+                break;
+            
+            case OP_COS:
+                fprintf(stream, "cos(");
+                break;
+
             case OP_MUL:
                 fprintf(stream, " \\cdot ");
                 break;
-            PUT_SUB
+
             case OP_DIV:
                 fprintf(stream, "}{");
                 break;
+            
             case UNDEF_OPER_TYPE:
                 fprintf(stream, "?");
                 break;
+
             default:
                 fprintf(stream, "#");
                 break;
@@ -447,7 +471,10 @@ int SaveTreeInLatex(Tree* tree)
                             if (IS_OP(val) && VAL_OP(val) == OP_DIV)
                                 fprintf(stream, "\\frac{");
                             else if (!IS_NUM(val) && !IS_VAR(val))
-                                fprintf(stream, "(");
+                            {
+                                if (VAL_OP(val) != OP_SIN && VAL_OP(val) != OP_COS)
+                                    fprintf(stream, "(");
+                            }
                        };
 
     DFS_f post_function = [](Node* node, void* dfs_fp)
