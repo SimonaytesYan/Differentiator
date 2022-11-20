@@ -53,12 +53,12 @@
 
 #define PUT_SIN                     \
     case OP_SIN:                    \
-        fprintf(stream, " s ");     \
+        fprintf(stream, " sin ");     \
         break;
 
 #define PUT_COS                     \
     case OP_COS:                    \
-        fprintf(stream, " c ");     \
+        fprintf(stream, " cos ");     \
         break;
 
 static FILE* LatexFp = nullptr;
@@ -171,7 +171,7 @@ Node* DiffSin(Node* node_arg)
     L(new_node) = Diff(R(node_arg));
     R(new_node) = NodeCtorOp(OP_COS);
 
-    RL(new_node) = NodeCtorNum(0);
+    RL(new_node) = nullptr;
     RR(new_node) = Cpy(R(node_arg));
 
     return new_node;
@@ -187,7 +187,7 @@ Node* DiffCos(Node* node_arg)
     RR(new_node) = NodeCtorOp(OP_SIN);
     RL(new_node) = NodeCtorNum(0);
 
-    L(RR(new_node)) = NodeCtorNum(0);
+    L(RR(new_node)) = nullptr;
     R(RR(new_node)) = Cpy(R(node_arg));
 
     return new_node;
@@ -538,6 +538,24 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         val->type   = TYPE_OP;
         val->val.op = OP_DIV;
     }
+    else if (strcmp(str, "sin") == 0)
+    {
+        #ifdef DEBUG
+            printf("sin\n");
+        #endif
+
+        val->type   = TYPE_OP;
+        val->val.op = OP_SIN;
+    }
+    else if (strcmp(str, "cos") == 0)
+    {
+        #ifdef DEBUG
+            printf("cos\n");
+        #endif
+
+        val->type   = TYPE_OP;
+        val->val.op = OP_COS;
+    }
     else if (atof(str) == 0 && strcmp(str, "0"))
     {
         #ifdef DEBUG
@@ -614,6 +632,12 @@ void GetNodeFromFile(Node** node, FILE* fp)
 
         GetNodeValFromStr(new_object, &(new_node)->val);
 
+        if (new_node->val.type == TYPE_OP && 
+           (VAL_OP(new_node->val) == OP_SIN || VAL_OP(new_node->val) == OP_COS))
+        {
+            free(L(new_node));
+            L(new_node) = nullptr;
+        }
         #ifdef DEBUG
             printf("\nGo to right\n");
         #endif

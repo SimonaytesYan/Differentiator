@@ -41,4 +41,9 @@ int  LogPrintf(const char *format, ...);
             return error;                   \
     }
 
+#define IF_DEBUG(...)
+    #ifdef DEBUG
+        ##__VA_ARGS__
+    #endif
+
 #endif //__LOGGING_SYM__
