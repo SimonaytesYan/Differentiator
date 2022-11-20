@@ -18,6 +18,8 @@ enum OPER_TYPES
     OP_SUB          = 1,
     OP_MUL          = 2,
     OP_DIV          = 3,
+    OP_SIN          = 4,
+    OP_COS          = 5,
 };
 
 struct Node_t 
@@ -39,6 +41,8 @@ const int  MAX_STR_LEN         = 20;
 
 const char DEFAULT_TREE_NAME[] = "Tree";
 
+const char DEFAULT_TEX_NAME[]  = "Zorich_3_volume.tex";
+
 int  SaveTreeInFile(Tree* tree, const char file_name[]);
 
 void GetNodeFromFile(Node** new_node, FILE* fp);
@@ -47,7 +51,11 @@ int  GetTreeFromFile(Tree* tree, const char file_name[]);
 
 void OutputGraphicDump(Tree* tree);
 
-int  SaveTreeInLatex(Tree* tree, const char file_name[]);
+int OpenLatexFile(const char file_name[]);
+
+int SaveTreeInLatex(Tree* tree);
+
+void CloseLatexFile();
 
 Node* Diff(Node* node);
 

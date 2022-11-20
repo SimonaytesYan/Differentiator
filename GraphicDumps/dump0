@@ -1,10 +1,10 @@
 digraph G{
 node[shape = record, fontsize = 14];
 splines = ortho
-info[label = "root = 0xF314F0"]
-NodeF314F0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>F314F0 \n | { <v>1 | (null) \n | 3 |0.000000 } | { <l> F31530  |<r>  F31590}}"]
-NodeF314F0 -> NodeF31530[xlabel = "Да"]
-NodeF314F0 -> NodeF31590[xlabel = "Нет"]
-NodeF31530[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>F31530 \n | { <v>0 | x \n | 0 |0.000000 } | { <l> 000000  |<r>  000000}}"]
-NodeF31590[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>F31590 \n | { <v>2 | (null) \n | 0 |1.000000 } | { <l> 000000  |<r>  000000}}"]
+info[label = "root = 0xD814F0"]
+NodeD814F0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>D814F0 \n | { <v>1 | (null) \n | 3 |0.000000 } | { <l> D81530  |<r>  D81590}}"]
+NodeD814F0 -> NodeD81530[xlabel = "Да"]
+NodeD814F0 -> NodeD81590[xlabel = "Нет"]
+NodeD81530[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>D81530 \n | { <v>0 | x \n | 0 |0.000000 } | { <l> 000000  |<r>  000000}}"]
+NodeD81590[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>D81590 \n | { <v>2 | (null) \n | 0 |1.000000 } | { <l> 000000  |<r>  000000}}"]
 }

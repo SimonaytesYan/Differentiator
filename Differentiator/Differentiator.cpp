@@ -19,7 +19,6 @@
 
 #define RR(node) node->right->right
 
-
 #define IS_VAR(node) (node.type == TYPE_VAR)
 
 #define IS_OP(node) (node.type == TYPE_OP)
@@ -51,6 +50,9 @@
     case OP_DIV:               \
         fprintf(stream, " / ");  \
         break;
+
+
+static FILE* LatexFp = nullptr;
 
 //FUNCTION PROTOTIPES
 
@@ -153,6 +155,35 @@ Node* DiffMult(Node* node_arg)
     return new_node;
 }
 
+Node* DiffSin(Node* node_arg)
+{
+    Node* new_node = NodeCtorOp(OP_MUL);
+
+    L(new_node) = Diff(R(node_arg));
+    R(new_node) = NodeCtorOp(OP_COS);
+
+    RL(new_node) = NodeCtorNum(0);
+    RR(new_node) = Cpy(R(node_arg));
+
+    return new_node;
+}
+
+Node* DiffCos(Node* node_arg)
+{
+    Node* new_node = NodeCtorOp(OP_MUL);
+
+    L(new_node)  = Diff(R(node_arg));
+    R(new_node)  = NodeCtorOp(OP_SUB);
+
+    RR(new_node) = NodeCtorOp(OP_SIN);
+    RL(new_node) = NodeCtorNum(0);
+
+    L(RR(new_node)) = NodeCtorNum(0);
+    R(RR(new_node)) = Cpy(R(node_arg));
+
+    return new_node;
+}
+
 Node* Diff(Node* node_arg)
 {
     assert(node_arg);
@@ -189,13 +220,16 @@ Node* Diff(Node* node_arg)
             return new_node;
         }
         case OP_MUL:
-        {
             return DiffMult(node_arg);
-        }
+            
         case OP_DIV:
-        {
             return DiffDiv(node_arg);
-        }
+            
+        case OP_SIN:
+            return DiffSin(node_arg);
+            
+        case OP_COS:
+            return DiffCos(node_arg);
 
         case UNDEF_OPER_TYPE:
         {
@@ -377,15 +411,33 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
     }
 }
 
-int SaveTreeInLatex(Tree* tree, const char file_name[])
+int OpenLatexFile(const char file_name[])
+{
+    LatexFp = fopen(file_name, "w");
+    CHECK(LatexFp == nullptr, "Error during open file", -1);
+    
+    PrintInLatexStartDoc(LatexFp);
+}
+
+void CloseLatexFile()
+{
+    PrintfInLatexEndDoc(LatexFp);
+
+    fclose(LatexFp);
+    LatexFp = nullptr;
+}
+
+int SaveTreeInLatex(Tree* tree)
 {
     ReturnIfError(TreeCheck(tree));
 
-    FILE* fp = fopen(file_name, "w");
-    CHECK(fp == nullptr, "Error during open file", -1);
-    
-    PrintInLatexStartDoc(fp);
-    fprintf(fp, "$$");
+    if (LatexFp == nullptr)
+    {
+        LogPrintf("Latex file didnt open\n");
+        assert(LatexFp || "Latex file didnt open");
+    }
+
+    fprintf(LatexFp, "\n$$");
 
     DFS_f pre_function = [](Node* node, void* dfs_fp)
                        {
@@ -409,14 +461,13 @@ int SaveTreeInLatex(Tree* tree, const char file_name[])
                                 fprintf(stream, ")");
                         };
 
-    DFS(tree->root, pre_function,     fp,
-                    PrintElemInLatex, fp,
-                    post_function,    fp);
+    DFS(tree->root, pre_function,     LatexFp,
+                    PrintElemInLatex, LatexFp,
+                    post_function,    LatexFp);
 
-    fprintf(fp, "$$");
-    PrintfInLatexEndDoc(fp);
+    fprintf(LatexFp, "$$");
 
-    fclose(fp);
+    fflush(LatexFp);
 
     return 0;
 }

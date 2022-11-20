@@ -22,12 +22,16 @@ int main()
     printf("End out\n");
 
     OutputGraphicDump(&tree);
-    
-    SaveTreeInFile(&tree, DEFAULT_TREE_NAME);
-    SaveTreeInLatex(&DTree, "Zorich_3_volume.tex");
+
+    OpenLatexFile(DEFAULT_TEX_NAME);
+
+    SaveTreeInLatex(&tree);
+    SaveTreeInLatex(&DTree);
 
     TreeDtor(&tree);
     TreeDtor(&DTree);
+
+    CloseLatexFile();
     
     CloseHtmlLogFile();
     printf("End main\n");
