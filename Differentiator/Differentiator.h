@@ -37,30 +37,34 @@ void PrintElemInLog(Node_t elem);
 
 #include "Libs/BinaryTree/BinaryTree.h"
 
-const int  MAX_STR_LEN         = 20;
+const int   MAX_STR_LEN         = 20;
 
-const char DEFAULT_TREE_NAME[] = "Tree";
+const char  DEFAULT_TREE_NAME[] = "Tree";
 
-const char DEFAULT_TEX_NAME[]  = "Zorich_3_volume.tex";
+const char  DEFAULT_TEX_NAME[]  = "Zorich_3_volume.tex";
 
-int  SaveTreeInFile(Tree* tree, const char file_name[]);
+int   SaveTreeInFile(Tree* tree, const char file_name[]);
 
-void GetNodeFromFile(Node** new_node, FILE* fp);
+void  GetNodeFromFile(Node** new_node, FILE* fp);
 
-int  GetTreeFromFile(Tree* tree, const char file_name[]);
+int   GetTreeFromFile(Tree* tree, const char file_name[]);
 
-void OutputGraphicDump(Tree* tree);
+void  OutputGraphicDump(Tree* tree);
 
-int OpenLatexFile(const char file_name[]);
+int   OpenLatexFile(const char file_name[]);
 
-int TexNode(Node* root);
+int   TexNode(Node* root);
 
-void CloseLatexFile();
+void  CloseLatexFile();
 
 Node* Diff(Node* node);
 
 Node* Cpy(Node* node);
 
-void PrintfInLatex(const char *format, ...);
+void  PrintfInLatex(const char *format, ...);
+
+void  SimplifyTree();
+
+void  SimplifyNode();
 
 #endif //__DIFFERENTIATOR_SYM__

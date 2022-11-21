@@ -6,9 +6,28 @@
 
 //#define DEBUG
 
-//--------------------STATIC VARIABLES--------------------
+//--------------------CONST AND STATIC VARIABLES--------------------
 
 static FILE* LatexFp = nullptr;
+
+const int   BUNDLES_NUMBER      = 15;
+
+const char* BUNDLES[]           = {"Очевидно, что\\\\\n",
+                                   "Не трудно заметить\\\\\n",
+                                   "Отметим, что\\\\\n",
+                                   "С другой стороны\\\\\n",
+                                   "Таким образом\\\\\n",
+                                   "Имеем\\\\\n",
+                                   "Поэтому\\\\\n",
+                                   "Откуда\\\\\n",
+                                   "Кроме того\\\\\n",
+                                   "Оказывается\\\\\n",
+                                   "Положим\\\\\n",
+                                   "При этом\\\\\n",
+                                   "Говорят\\\\\n",
+                                   "Руководствуясь базовой логикой, получаем\\\\\n",
+                                   "Продвинутый читатель уже заметил, что\\\\\n",
+                                   };
 
 //--------------------FUNCTION PROTOTIPES--------------------
 
@@ -16,9 +35,9 @@ static void  GetNodeValFromStr(const char str[], Node_t* val);
 
 static void  PrintElem(FILE* stream, Node_t elem);
 
-static void  PrintfInLatexEndDoc(FILE* fp);
+static void  PrintfInLatexEndDoc();
 
-static void  PrintInLatexStartDoc(FILE* fp);
+static void  PrintInLatexStartDoc();
 
 static Node* NodeCtorNum(double val);
 
@@ -37,6 +56,10 @@ static Node* DiffCos(Node* node_arg);
 static Node* DiffSum(Node* node_arg);
 
 static Node* DiffSub(Node* node_arg);
+
+static void PrintRandBundles(FILE* stream);
+
+static void PrintfInLatexReal(const char* function, const char *format, ...);
 
 //--------------------DSL--------------------
 
@@ -99,6 +122,8 @@ static Node* DiffSub(Node* node_arg);
 
 
 #define ReturnAndTex                \
+    PrintRandBundles(LatexFp);      \
+                                    \
     PrintfInLatex("(");             \
     TexNode(node_arg);              \
     PrintfInLatex(")`");            \
@@ -112,11 +137,11 @@ static Node* DiffSub(Node* node_arg);
 
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
-void PrintfInLatexReal(const char* function, const char *format, ...)
+static void PrintfInLatexReal(const char* function, const char *format, ...)
 {
     if (LatexFp == nullptr)
     {
-        printf("%s\n", function);
+        fprintf(stderr, "%s\n", function);
         assert(LatexFp == nullptr);
     }
 
@@ -127,6 +152,11 @@ void PrintfInLatexReal(const char* function, const char *format, ...)
 
     va_end(args);
     fflush(LatexFp);
+}
+
+static void PrintRandBundles(FILE* stream)
+{
+    fprintf(stream, "%s", BUNDLES[rand() % BUNDLES_NUMBER]);
 }
 
 static Node* NodeCtorNum(double val)
@@ -409,7 +439,7 @@ void PrintElemInLog(Node_t elem)
     LogPrintf("}\n");
 }
 
-static void PrintInLatexStartDoc(FILE* fp)
+static void PrintInLatexStartDoc()
 {
     PrintfInLatex("\\documentclass[12pt,a4paper,fleqn]{article}\n"
                   "\\usepackage[utf8]{inputenc}\n"
@@ -429,7 +459,7 @@ static void PrintInLatexStartDoc(FILE* fp)
                  );
 }
 
-static void PrintfInLatexEndDoc(FILE* fp)
+static void PrintfInLatexEndDoc()
 {
     PrintfInLatex("\n"
                   "\\end{document}");
@@ -493,14 +523,14 @@ int OpenLatexFile(const char file_name[])
     LatexFp = fopen(file_name, "w");
     CHECK(LatexFp == nullptr, "Error during open file", -1);
     
-    PrintInLatexStartDoc(LatexFp);
+    PrintInLatexStartDoc();
 
     return 0;
 }
 
 void CloseLatexFile()
 {
-    PrintfInLatexEndDoc(LatexFp);
+    PrintfInLatexEndDoc();
 
     fclose(LatexFp);
     LatexFp = nullptr;
@@ -511,7 +541,9 @@ int TexNode(Node* root)
     assert(root);
     assert(LatexFp || "Latex file didnt open");
 
-    printf("Start tex\n");    
+    #ifdef DEBUG
+        printf("Start tex\n");    
+    #endif
 
     PrintfInLatex( "$");
 
@@ -646,7 +678,11 @@ void GetNodeFromFile(Node** node, FILE* fp)
     if (c == ')')
     {
         *node = nullptr;
-        printf("end node\n");
+
+        #ifdef DEBUG
+            printf("end node\n");
+        #endif
+
         return;
     }
     else if (c == '(')

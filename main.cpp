@@ -1,7 +1,10 @@
+#include "time.h"
+
 #include "Differentiator/Differentiator.h"
 
 int main()
 {
+    srand(time(NULL));
     printf("Start main\n");
 
     OpenHtmlLogFile("Diff.log");
