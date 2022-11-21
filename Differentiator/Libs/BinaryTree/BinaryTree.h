@@ -95,13 +95,57 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
 
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat"
-    fprintf(fp, "Node%06X[style = \"filled,rounded\", fillcolor = \"#B1FF9F\", label = \"{<i>%06X \\n | { <v>%d | %s \\n | %d |%lf } | { <l> %06X  |<r>  %06X}}\"]\n",
-                node,                                                                   node, node->val.type, node->val.val.var, node->val.val.op, node->val.val.dbl, node->left, node->right);
+    fprintf(fp, "Node%06X[style = \"filled,rounded\", fillcolor = \"#B1FF9F\", label = \"{<i>%06X \\n | { <v>",
+                     node,                                                                      node);
+    switch (node->val.type)
+    {
+    case TYPE_NUM:
+        fprintf(fp, "NUM");
+        break;
+    case TYPE_OP:
+        fprintf(fp, "OPER");
+        break;
+    case TYPE_VAR:
+        fprintf(fp, "VAR");
+        break;
+    case UNDEF_NODE_TYPE:
+        fprintf(fp, "UNDEF");
+        break;
+    default:
+        fprintf(fp, "unknown");
+        break;
+    }
+    fprintf(fp, " | %s \\n | ", node->val.val.var);
+
+    switch(node->val.val.op)
+    {
+        case OP_COS:
+            fprintf(fp, "cos");
+            break;
+        case OP_SIN:
+            fprintf(fp, "sin");
+            break;
+        case OP_PLUS:
+            fprintf(fp, "+");
+            break;
+        case OP_SUB:
+            fprintf(fp, "-");
+            break;
+        case OP_MUL:
+            fprintf(fp, "*");
+            break;
+        case OP_DIV:
+            fprintf(fp, "/");
+            break;
+    }
+
+    fprintf(fp, " |%lf } | { <l> %06X  |<r>  %06X}}\"]\n",
+                 node->val.val.dbl, node->left, node->right);
     
     if (node->left != nullptr)
-        fprintf(fp, "Node%06X -> Node%06X[xlabel = \"Да\"]\n", node, node->left);
+        fprintf(fp, "Node%06X -> Node%06X[xlabel = \"L\"]\n", node, node->left);
     if (node->right != nullptr)
-        fprintf(fp, "Node%06X -> Node%06X[xlabel = \"Нет\"]\n", node, node->right);
+        fprintf(fp, "Node%06X -> Node%06X[xlabel = \"R\"]\n", node, node->right);
     #pragma GCC diagnostic pop
 }
 
