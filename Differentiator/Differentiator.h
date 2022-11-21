@@ -63,8 +63,8 @@ Node* Cpy(Node* node);
 
 void  PrintfInLatex(const char *format, ...);
 
-void  SimplifyTree();
+void  SimplifyTree(Tree* tree);
 
-void  SimplifyNode();
+void  ConstsConvolution(Node* node);
 
 #endif //__DIFFERENTIATOR_SYM__

@@ -16,22 +16,11 @@ int main()
     printf("Tree got\n");
 
     OutputGraphicDump(&tree);
-
-    Tree DTree = {};
-    TreeCtor(&DTree);
-
-    DTree.root = Diff(tree.root);
-    printf("End diff\n");
-
-    OutputGraphicDump(&DTree);
-    printf("End out\n");
+    
+    SimplifyTree(&tree);
 
     OutputGraphicDump(&tree);
 
-    TreeDtor(&tree);
-    TreeDtor(&DTree);
-
-    CloseLatexFile();
     printf("Close latex\n");
     
     CloseHtmlLogFile();

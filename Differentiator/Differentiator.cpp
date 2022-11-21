@@ -63,6 +63,32 @@ static void PrintfInLatexReal(const char* function, const char *format, ...);
 
 //--------------------DSL--------------------
 
+#define ReturnAndTex                \
+    PrintRandBundles(LatexFp);      \
+                                    \
+    PrintfInLatex("(");             \
+    TexNode(node_arg);              \
+    PrintfInLatex(")`");            \
+                                    \
+    PrintfInLatex( " = ");          \
+    TexNode(new_node);              \
+    PrintfInLatex("\\\\\n");        \
+    return new_node;
+
+#define BinaryConstConv(oper)           \
+{                                       \
+    double a = VAL_N(L(node_arg)->val); \
+    double b = VAL_N(R(node_arg)->val); \
+                                        \
+    free(L(node_arg));                  \
+    free(R(node_arg));                  \
+    L(node_arg) = nullptr;              \
+    R(node_arg) = nullptr;              \
+                                        \
+    node_arg->val.type   = TYPE_NUM;    \
+    VAL_N(node_arg->val) = a oper b;    \
+}
+
 #define L(node) node->left
 
 #define R(node) node->right
@@ -119,19 +145,6 @@ static void PrintfInLatexReal(const char* function, const char *format, ...);
     case OP_COS:                    \
         fprintf(stream, " cos ");   \
         break;
-
-
-#define ReturnAndTex                \
-    PrintRandBundles(LatexFp);      \
-                                    \
-    PrintfInLatex("(");             \
-    TexNode(node_arg);              \
-    PrintfInLatex(")`");            \
-                                    \
-    PrintfInLatex( " = ");          \
-    TexNode(new_node);              \
-    PrintfInLatex("\\\\\n");        \
-    return new_node;
 
 //--------------------FUNCTION IMPLEMENTATION--------------------
 
@@ -770,4 +783,62 @@ void OutputGraphicDump(Tree* tree)
     #endif
 
     system(graphic_dump_file);
+}
+
+void SimplifyTree(Tree* tree)
+{
+    assert(tree);
+
+    ConstsConvolution(tree->root);
+}
+
+void ConstsConvolution(Node* node_arg)
+{
+    if (node_arg == nullptr)
+        return;
+
+    ConstsConvolution(node_arg->left);
+    ConstsConvolution(node_arg->right);
+
+    Node_t node = node_arg->val;
+
+    if (node.type != TYPE_OP)
+        return;
+
+    printf("start simply node\n");
+    
+    if (!IS_NUM(L(node_arg)->val) || !IS_NUM(R(node_arg)->val))
+        return;
+
+    printf("start simply node after\n");
+
+    switch (VAL_OP(node))
+    {
+    case OP_PLUS:
+        BinaryConstConv(+);
+        break;
+    case OP_SUB:
+        BinaryConstConv(-);
+        break;
+    case OP_MUL:
+        BinaryConstConv(*);
+        break;
+    case OP_DIV:
+        BinaryConstConv(/);
+        break;
+    case OP_SIN:
+
+        break;
+    case OP_COS:
+
+        break;
+    case UNDEF_OPER_TYPE:
+        assert(1 || "undef operator");
+        break;
+    default:
+        fprintf(stderr, "operation type = %d\n", VAL_OP(node));
+        assert(1 || "unknown operator");
+        break;
+    }
+    
 }
