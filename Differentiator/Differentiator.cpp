@@ -4,31 +4,13 @@
 #include <math.h>
 
 #include "Differentiator.h"
+#include "Libs/Bundles.h"
 
 //#define DEBUG
 
 //--------------------CONST AND STATIC VARIABLES--------------------
 
 static FILE* LatexFp = nullptr;
-
-const int   BUNDLES_NUMBER      = 15;
-
-const char* BUNDLES[]           = {"Очевидно, что\\\\\n",
-                                   "Не трудно заметить\\\\\n",
-                                   "Отметим, что\\\\\n",
-                                   "С другой стороны\\\\\n",
-                                   "Таким образом\\\\\n",
-                                   "Имеем\\\\\n",
-                                   "Поэтому\\\\\n",
-                                   "Откуда\\\\\n",
-                                   "Кроме того\\\\\n",
-                                   "Оказывается\\\\\n",
-                                   "Положим\\\\\n",
-                                   "При этом\\\\\n",
-                                   "Говорят\\\\\n",
-                                   "Руководствуясь базовой логикой, получаем\\\\\n",
-                                   "Продвинутый читатель уже заметил, что\\\\\n",
-                                   };
 
 //--------------------FUNCTION PROTOTIPES--------------------
 
@@ -60,7 +42,7 @@ static Node* DiffSub(Node* node_arg);
 
 static void PrintRandBundles(FILE* stream);
 
-static void PrintfInLatexReal(const char* function, const char *format, ...);
+void PrintfInLatexReal(const char* function, const char *format, ...);
 
 //--------------------DSL--------------------
 
@@ -162,7 +144,7 @@ static void PrintfInLatexReal(const char* function, const char *format, ...);
 
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
-static void PrintfInLatexReal(const char* function, const char *format, ...)
+void PrintfInLatexReal(const char* function, const char *format, ...)
 {
     if (LatexFp == nullptr)
     {
@@ -801,6 +783,8 @@ void SimplifyTree(Tree* tree)
 {
     assert(tree);
 
+    PrintfInLatex("\n\nУпростим получившееся выражение\n\n");
+
     ConstsConvolution(tree->root);
 }
 
@@ -817,16 +801,16 @@ void ConstsConvolution(Node* node_arg)
     if (node.type != TYPE_OP)
         return;
 
-    #ifdef DEBUG
-        printf("start simply node\n");
-    #endif
-
     if ((L(node_arg) != nullptr && !IS_NUM(L(node_arg)->val)) || !IS_NUM(R(node_arg)->val))
         return;
+    
+    PrintRandBundles(LatexFp);
 
-    #ifdef DEBUG
-        printf("start simply node after\n");
-    #endif
+    PrintfInLatex("(");
+    TexNode(node_arg);
+    PrintfInLatex(")");
+    
+    PrintfInLatex( " = ");
 
     switch (VAL_OP(node))
     {
@@ -857,4 +841,6 @@ void ConstsConvolution(Node* node_arg)
         break;
     }
     
+    TexNode(node_arg);
+    PrintfInLatex("\\\\\n");
 }

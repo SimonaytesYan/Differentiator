@@ -14,15 +14,29 @@ int main()
     TreeCtor(&tree);
     GetTreeFromFile(&tree, DEFAULT_TREE_NAME);
     printf("Tree got\n");
-
-    OutputGraphicDump(&tree);
     
-    SimplifyTree(&tree);
+    PrintfInLatex("$y = $");
 
-    OutputGraphicDump(&tree);
+    TexNode(tree.root);
+    PrintfInLatex("\n\n Продиффиринцируем эту функцию\n\n");
+
+    Tree DTree = {};
+    TreeCtor(&DTree);
+    
+    DTree.root = Diff(tree.root);
+    
+    SimplifyTree(&DTree);
+    
+    PrintfInLatex("\n\n Получаем выражение\n\n");
+
+    TexNode(DTree.root);
 
     printf("Close latex\n");
+
+    TreeDtor(&tree);
+    TreeDtor(&DTree);
     
+    CloseLatexFile();
     CloseHtmlLogFile();
     printf("End main\n");
 }

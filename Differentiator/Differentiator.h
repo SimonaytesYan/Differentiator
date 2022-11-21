@@ -67,4 +67,8 @@ void  SimplifyTree(Tree* tree);
 
 void  ConstsConvolution(Node* node);
 
+void PrintfInLatexReal(const char* function, const char *format, ...);
+
+#define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
+
 #endif //__DIFFERENTIATOR_SYM__
