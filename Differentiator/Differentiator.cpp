@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <math.h>
 
 #include "Differentiator.h"
 
@@ -87,6 +88,17 @@ static void PrintfInLatexReal(const char* function, const char *format, ...);
                                         \
     node_arg->val.type   = TYPE_NUM;    \
     VAL_N(node_arg->val) = a oper b;    \
+}
+
+#define UnaryConstConv(func)            \
+{                                       \
+    double a = VAL_N(R(node_arg)->val); \
+                                        \
+    free(R(node_arg));                  \
+    R(node_arg) = nullptr;              \
+                                        \
+    node_arg->val.type   = TYPE_NUM;    \
+    VAL_N(node_arg->val) = func(a);     \
 }
 
 #define L(node) node->left
@@ -805,12 +817,16 @@ void ConstsConvolution(Node* node_arg)
     if (node.type != TYPE_OP)
         return;
 
-    printf("start simply node\n");
-    
-    if (!IS_NUM(L(node_arg)->val) || !IS_NUM(R(node_arg)->val))
+    #ifdef DEBUG
+        printf("start simply node\n");
+    #endif
+
+    if ((L(node_arg) != nullptr && !IS_NUM(L(node_arg)->val)) || !IS_NUM(R(node_arg)->val))
         return;
 
-    printf("start simply node after\n");
+    #ifdef DEBUG
+        printf("start simply node after\n");
+    #endif
 
     switch (VAL_OP(node))
     {
@@ -827,10 +843,10 @@ void ConstsConvolution(Node* node_arg)
         BinaryConstConv(/);
         break;
     case OP_SIN:
-
+        UnaryConstConv(sin);
         break;
     case OP_COS:
-
+        UnaryConstConv(cos);
         break;
     case UNDEF_OPER_TYPE:
         assert(1 || "undef operator");
