@@ -12,6 +12,7 @@ int  CloseLogFile();
 void ParseErrorCode(int error);
 
 int  OpenHtmlLogFile(const char* file_name);
+
 int  CloseHtmlLogFile();
 
 int  LogPrintf(const char *format, ...);

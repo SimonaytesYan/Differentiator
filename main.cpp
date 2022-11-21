@@ -3,7 +3,9 @@
 int main()
 {
     printf("Start main\n");
+
     OpenHtmlLogFile("Diff.log");
+    OpenLatexFile(DEFAULT_TEX_NAME);
 
     Tree tree = {};
     TreeCtor(&tree);
@@ -23,15 +25,11 @@ int main()
 
     OutputGraphicDump(&tree);
 
-    OpenLatexFile(DEFAULT_TEX_NAME);
-
-    SaveTreeInLatex(&tree);
-    SaveTreeInLatex(&DTree);
-
     TreeDtor(&tree);
     TreeDtor(&DTree);
 
     CloseLatexFile();
+    printf("Close latex\n");
     
     CloseHtmlLogFile();
     printf("End main\n");

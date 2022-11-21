@@ -53,12 +53,14 @@ void OutputGraphicDump(Tree* tree);
 
 int OpenLatexFile(const char file_name[]);
 
-int SaveTreeInLatex(Tree* tree);
+int TexNode(Node* root);
 
 void CloseLatexFile();
 
 Node* Diff(Node* node);
 
 Node* Cpy(Node* node);
+
+void PrintfInLatex(const char *format, ...);
 
 #endif //__DIFFERENTIATOR_SYM__

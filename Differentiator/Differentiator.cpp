@@ -1,11 +1,44 @@
 #include <stdio.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #include "Differentiator.h"
 
-#define DEBUG
+//#define DEBUG
 
-//DSL
+//--------------------STATIC VARIABLES--------------------
+
+static FILE* LatexFp = nullptr;
+
+//--------------------FUNCTION PROTOTIPES--------------------
+
+static void  GetNodeValFromStr(const char str[], Node_t* val);
+
+static void  PrintElem(FILE* stream, Node_t elem);
+
+static void  PrintfInLatexEndDoc(FILE* fp);
+
+static void  PrintInLatexStartDoc(FILE* fp);
+
+static Node* NodeCtorNum(double val);
+
+static Node* NodeCtorVar(char* val);
+
+static Node* NodeCtorOp(OPER_TYPES val);
+
+static Node* DiffDiv(Node* node_arg);
+
+static Node* DiffMult(Node* node_arg);
+
+static Node* DiffSin(Node* node_arg);
+
+static Node* DiffCos(Node* node_arg);
+
+static Node* DiffSum(Node* node_arg);
+
+static Node* DiffSub(Node* node_arg);
+
+//--------------------DSL--------------------
 
 #define L(node) node->left
 
@@ -19,17 +52,20 @@
 
 #define RR(node) node->right->right
 
+
 #define IS_VAR(node) (node.type == TYPE_VAR)
 
 #define IS_OP(node) (node.type == TYPE_OP)
 
 #define IS_NUM(node) (node.type == TYPE_NUM)
 
+
 #define VAL_N(node) node.val.dbl
 
 #define VAL_OP(node) node.val.op
 
 #define VAL_VAR(node) node.val.var
+
 
 #define PUT_PLUS                    \
     case OP_PLUS:                   \
@@ -53,37 +89,45 @@
 
 #define PUT_SIN                     \
     case OP_SIN:                    \
-        fprintf(stream, " sin ");     \
+        fprintf(stream, " sin ");   \
         break;
 
 #define PUT_COS                     \
     case OP_COS:                    \
-        fprintf(stream, " cos ");     \
+        fprintf(stream, " cos ");   \
         break;
 
-static FILE* LatexFp = nullptr;
 
-//FUNCTION PROTOTIPES
+#define ReturnAndTex                \
+    PrintfInLatex("(");             \
+    TexNode(node_arg);              \
+    PrintfInLatex(")`");            \
+                                    \
+    PrintfInLatex( " = ");          \
+    TexNode(new_node);              \
+    PrintfInLatex("\\\\\n");        \
+    return new_node;
 
-static void GetNodeValFromStr(const char str[], Node_t* val);
+//--------------------FUNCTION IMPLEMENTATION--------------------
 
-static void PrintElem(FILE* stream, Node_t elem);
+#define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
-static void PrintfInLatexEndDoc(FILE* fp);
+void PrintfInLatexReal(const char* function, const char *format, ...)
+{
+    if (LatexFp == nullptr)
+    {
+        printf("%s\n", function);
+        assert(LatexFp == nullptr);
+    }
 
-static void PrintInLatexStartDoc(FILE* fp);
+    va_list args;
+    va_start(args, format);
 
-static Node* NodeCtorNum(double val);
+    vfprintf(LatexFp, format, args);
 
-static Node* NodeCtorVar(char* val);
-
-static Node* NodeCtorOp(OPER_TYPES val);
-
-static Node* DiffDiv(Node* node_arg);
-
-static Node* DiffMult(Node* node_arg);
-
-//FUNCTION IMPLEMENTATION
+    va_end(args);
+    fflush(LatexFp);
+}
 
 static Node* NodeCtorNum(double val)
 {
@@ -124,7 +168,7 @@ static Node* NodeCtorOp(OPER_TYPES val)
     return new_node;
 }
 
-Node* DiffDiv(Node* node_arg)
+static Node* DiffDiv(Node* node_arg)
 {
     Node* new_node = NodeCtorOp(OP_DIV);
 
@@ -143,10 +187,10 @@ Node* DiffDiv(Node* node_arg)
     RR(new_node) = Cpy(R(node_arg));
     RL(new_node) = Cpy(R(node_arg));
 
-    return new_node;
+    ReturnAndTex;
 }
 
-Node* DiffMult(Node* node_arg)
+static Node* DiffMult(Node* node_arg)
 {
     Node* new_node   = NodeCtorOp(OP_PLUS);
     Node* left_node  = NodeCtorOp(OP_MUL);
@@ -161,10 +205,10 @@ Node* DiffMult(Node* node_arg)
     RL(new_node) = Cpy(L(node_arg));
     RR(new_node) = Diff(R(node_arg));
 
-    return new_node;
+    ReturnAndTex;
 }
 
-Node* DiffSin(Node* node_arg)
+static Node* DiffSin(Node* node_arg)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
@@ -174,10 +218,10 @@ Node* DiffSin(Node* node_arg)
     RL(new_node) = nullptr;
     RR(new_node) = Cpy(R(node_arg));
 
-    return new_node;
+    ReturnAndTex;
 }
 
-Node* DiffCos(Node* node_arg)
+static Node* DiffCos(Node* node_arg)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
@@ -190,27 +234,27 @@ Node* DiffCos(Node* node_arg)
     L(RR(new_node)) = nullptr;
     R(RR(new_node)) = Cpy(R(node_arg));
 
-    return new_node;
+    ReturnAndTex;
 }
 
-Node* DiffSum(Node* node_arg)
+static Node* DiffSum(Node* node_arg)
 {
     Node* new_node  = NodeCtorOp(OP_PLUS);
 
     new_node->left  = Diff(node_arg->left);
     new_node->right = Diff(node_arg->right);
 
-    return new_node;
+    ReturnAndTex;
 }
 
-Node* DiffSub(Node* node_arg)
+static Node* DiffSub(Node* node_arg)
 {
     Node* new_node  = NodeCtorOp(OP_SUB);
 
     new_node->left  = Diff(node_arg->left);
     new_node->right = Diff(node_arg->right);
                 
-    return new_node;
+    ReturnAndTex;
 }
 
 Node* Diff(Node* node_arg)
@@ -219,10 +263,16 @@ Node* Diff(Node* node_arg)
     Node_t node = node_arg->val;
 
     if (IS_NUM(node))
-        return NodeCtorNum(0);
+    {
+        Node* new_node = NodeCtorNum(0);
+        ReturnAndTex;
+    }
 
     if (IS_VAR(node))
-        return NodeCtorNum(1);
+    {
+        Node* new_node = NodeCtorNum(1);
+        ReturnAndTex;
+    }
 
     if (IS_OP(node))
     {
@@ -266,8 +316,10 @@ Node* Cpy(Node* node)
     if (node == nullptr)
         return nullptr;
     PrintElem(stdout, node->val);
-
-    printf(" node = %p\nleft = %p\nright = %p\n", node, L(node), R(node));
+    
+    #ifdef DEBUG
+        printf(" node = %p\nleft = %p\nright = %p\n", node, L(node), R(node));
+    #endif
 
     Node* new_node = (Node*)calloc(1, sizeof(Node));
 
@@ -359,28 +411,28 @@ void PrintElemInLog(Node_t elem)
 
 static void PrintInLatexStartDoc(FILE* fp)
 {
-    fprintf(fp, "\\documentclass[12pt,a4paper,fleqn]{article}\n"
-                "\\usepackage[utf8]{inputenc}\n"
-                "\\usepackage[russian]{babel}\n"
-                "\\usepackage{amssymb, amsmath, multicol}\n"
-                "\\usepackage{enumitem}\n"
-                "\\usepackage{lipsum}\n"
-                "\\usepackage{euler}\n"
-                "\\oddsidemargin=-15.4mm\n"
-                "\\textwidth=190mm\n"
-                "\\headheight=-32.4mm\n"
-                "\\textheight=277mm\n"
-                "\\parindent=0pt\n"
-                "\\parskip=8pt\n"
-                "\\pagestyle{empty}\n"
-                "\\begin{document}\n"
-                );
+    PrintfInLatex("\\documentclass[12pt,a4paper,fleqn]{article}\n"
+                  "\\usepackage[utf8]{inputenc}\n"
+                  "\\usepackage[russian]{babel}\n"
+                  "\\usepackage{amssymb, amsmath, multicol}\n"
+                  "\\usepackage{enumitem}\n"
+                  "\\usepackage{lipsum}\n"
+                  "\\usepackage{euler}\n"
+                  "\\oddsidemargin=-15.4mm\n"
+                  "\\textwidth=190mm\n"
+                  "\\headheight=-32.4mm\n"
+                  "\\textheight=277mm\n"
+                  "\\parindent=0pt\n"
+                  "\\parskip=8pt\n"
+                  "\\pagestyle{empty}\n"
+                  "\\begin{document}\n"
+                 );
 }
 
 static void PrintfInLatexEndDoc(FILE* fp)
 {
-    fprintf(fp, "\n"
-                "\\end{document}");
+    PrintfInLatex("\n"
+                  "\\end{document}");
 }
 
 static void PrintElemInLatex(Node* node, void* dfs_fp)
@@ -442,6 +494,8 @@ int OpenLatexFile(const char file_name[])
     CHECK(LatexFp == nullptr, "Error during open file", -1);
     
     PrintInLatexStartDoc(LatexFp);
+
+    return 0;
 }
 
 void CloseLatexFile()
@@ -452,17 +506,14 @@ void CloseLatexFile()
     LatexFp = nullptr;
 }
 
-int SaveTreeInLatex(Tree* tree)
+int TexNode(Node* root)
 {
-    ReturnIfError(TreeCheck(tree));
+    assert(root);
+    assert(LatexFp || "Latex file didnt open");
 
-    if (LatexFp == nullptr)
-    {
-        LogPrintf("Latex file didnt open\n");
-        assert(LatexFp || "Latex file didnt open");
-    }
+    printf("Start tex\n");    
 
-    fprintf(LatexFp, "\n$$");
+    PrintfInLatex( "$");
 
     DFS_f pre_function = [](Node* node, void* dfs_fp)
                        {
@@ -489,11 +540,11 @@ int SaveTreeInLatex(Tree* tree)
                                 fprintf(stream, ")");
                         };
 
-    DFS(tree->root, pre_function,     LatexFp,
-                    PrintElemInLatex, LatexFp,
-                    post_function,    LatexFp);
+    DFS(root, pre_function,     LatexFp,
+              PrintElemInLatex, LatexFp,
+              post_function,    LatexFp);
 
-    fprintf(LatexFp, "$$");
+    PrintfInLatex("$");
 
     fflush(LatexFp);
 
