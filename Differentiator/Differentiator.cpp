@@ -193,15 +193,33 @@ Node* DiffCos(Node* node_arg)
     return new_node;
 }
 
+Node* DiffSum(Node* node_arg)
+{
+    Node* new_node  = NodeCtorOp(OP_PLUS);
+
+    new_node->left  = Diff(node_arg->left);
+    new_node->right = Diff(node_arg->right);
+
+    return new_node;
+}
+
+Node* DiffSub(Node* node_arg)
+{
+    Node* new_node  = NodeCtorOp(OP_SUB);
+
+    new_node->left  = Diff(node_arg->left);
+    new_node->right = Diff(node_arg->right);
+                
+    return new_node;
+}
+
 Node* Diff(Node* node_arg)
 {
     assert(node_arg);
     Node_t node = node_arg->val;
 
     if (IS_NUM(node))
-    {
         return NodeCtorNum(0);
-    }
 
     if (IS_VAR(node))
         return NodeCtorNum(1);
@@ -210,48 +228,31 @@ Node* Diff(Node* node_arg)
     {
         switch (VAL_OP(node))
         {
-        case OP_PLUS:
-        {
-            Node* new_node  = NodeCtorOp(OP_PLUS);
+            case OP_PLUS:
+                return DiffSum(node_arg);
+            case OP_SUB:
+                return DiffSub(node_arg);
+            case OP_MUL:
+                return DiffMult(node_arg);
+            case OP_DIV:
+                return DiffDiv(node_arg);
+            case OP_SIN:
+                return DiffSin(node_arg);
+            case OP_COS:
+                return DiffCos(node_arg);
 
-            new_node->left  = Diff(node_arg->left);
-            new_node->right = Diff(node_arg->right);
-
-            return new_node;
-        }
-        case OP_SUB:
-        {
-            Node* new_node  = NodeCtorOp(OP_SUB);
-
-            new_node->left  = Diff(node_arg->left);
-            new_node->right = Diff(node_arg->right);
+            case UNDEF_OPER_TYPE:
+            {
+                LogPrintf("Undefined operation type while diff\n");
+                return nullptr;
+            }
             
-            return new_node;
-        }
-        case OP_MUL:
-            return DiffMult(node_arg);
-            
-        case OP_DIV:
-            return DiffDiv(node_arg);
-            
-        case OP_SIN:
-            return DiffSin(node_arg);
-
-        case OP_COS:
-            return DiffCos(node_arg);
-
-        case UNDEF_OPER_TYPE:
-        {
-            LogPrintf("Undefined operation type while diff\n");
-            return nullptr;
-        }
-        
-        default:
-        {
-            LogPrintf("Unknown operation type while diff\n"
-                      "Operation type = %d", VAL_OP(node));            
-            return nullptr;
-        }
+            default:
+            {
+                LogPrintf("Unknown operation type while diff\n"
+                        "Operation type = %d", VAL_OP(node));            
+                return nullptr;
+            }
         }
     }
 
