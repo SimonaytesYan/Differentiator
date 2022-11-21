@@ -69,6 +69,16 @@ void  ConstsConvolution(Node* node);
 
 void PrintfInLatexReal(const char* function, const char *format, ...);
 
+int GetG(const char* str);
+
+int GetE();
+
+int GetT();
+
+int GetP();
+
+int GetN();
+
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
 #endif //__DIFFERENTIATOR_SYM__
