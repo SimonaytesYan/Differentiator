@@ -4,16 +4,7 @@
 
 int main()
 {
-    FILE* fp = fopen("test.txt", "r");
-
-    char str[100] = "";
-    fscanf(fp, "%s", str);
-
-    fclose(fp);
-
-    printf("%d", GetG(str));
-
-    /*srand(time(NULL));
+    srand(time(NULL));
     printf("Start main\n");
 
     OpenHtmlLogFile("Diff.log");
@@ -47,5 +38,5 @@ int main()
     
     CloseLatexFile();
     CloseHtmlLogFile();
-    printf("End main\n");*/
+    printf("End main\n");
 }

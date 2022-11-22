@@ -543,6 +543,31 @@ void CloseLatexFile()
     LatexFp = nullptr;
 }
 
+static void PreFuncTexNode(Node* node, void* dfs_fp)
+{
+    FILE* stream = (FILE*)dfs_fp;
+    Node_t val = node->val;
+                            
+    if (IS_OP(val) && VAL_OP(val) == OP_DIV)
+        fprintf(stream, "\\frac{");
+    else if (!IS_NUM(val) && !IS_VAR(val))
+    {
+        if (VAL_OP(val) != OP_SIN && VAL_OP(val) != OP_COS)
+            fprintf(stream, "(");
+    }
+}
+
+static void PostFuncTexNode(Node* node, void* dfs_fp)
+{
+    FILE* stream = (FILE*)dfs_fp;
+    Node_t val = node->val;
+
+    if (IS_OP(val) && VAL_OP(val) == OP_DIV)
+        fprintf(stream, "}");
+    else if (!IS_NUM(val) && !IS_VAR(val))
+        fprintf(stream, ")");
+}
+
 int TexNode(Node* root)
 {
     assert(root);
@@ -554,34 +579,9 @@ int TexNode(Node* root)
 
     PrintfInLatex( "$");
 
-    DFS_f pre_function = [](Node* node, void* dfs_fp)
-                       {
-                            FILE* stream = (FILE*)dfs_fp;
-                            Node_t val = node->val;
-                            
-                            if (IS_OP(val) && VAL_OP(val) == OP_DIV)
-                                fprintf(stream, "\\frac{");
-                            else if (!IS_NUM(val) && !IS_VAR(val))
-                            {
-                                if (VAL_OP(val) != OP_SIN && VAL_OP(val) != OP_COS)
-                                    fprintf(stream, "(");
-                            }
-                       };
-
-    DFS_f post_function = [](Node* node, void* dfs_fp)
-                        {
-                            FILE* stream = (FILE*)dfs_fp;
-                            Node_t val = node->val;
-
-                            if (IS_OP(val) && VAL_OP(val) == OP_DIV)
-                                fprintf(stream, "}");
-                            else if (!IS_NUM(val) && !IS_VAR(val))
-                                fprintf(stream, ")");
-                        };
-
-    DFS(root, pre_function,     LatexFp,
+    DFS(root, PreFuncTexNode,   LatexFp,
               PrintElemInLatex, LatexFp,
-              post_function,    LatexFp);
+              PostFuncTexNode,  LatexFp);
 
     PrintfInLatex("$");
 
