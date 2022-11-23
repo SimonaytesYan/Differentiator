@@ -12,7 +12,7 @@ logging_windows:
 
 
 linux: differentiator_linux logging_linux
-	g++ main.cpp Obj/Differentiator.o Obj/Logging.o $(C_FLAGS_WINDOWS)
+	g++ main.cpp Obj/Differentiator.o Obj/Logging.o $(C_FLAGS_LINUX) -o Exe/Start
 
 differentiator_linux:
 	g++ -c Differentiator/Differentiator.cpp $(C_FLAGS_LINUX) -o Obj/Differentiator.o

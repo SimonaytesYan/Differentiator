@@ -5,17 +5,21 @@
 int main()
 {
     srand(time(NULL));
-    printf("Start main\n");
+    printf("Starting main\n");
 
     OpenHtmlLogFile("Diff.log");
     OpenLatexFile(DEFAULT_TEX_NAME);
 
     Tree tree = {};
     TreeCtor(&tree);
+
+    printf("start getting tree\n");
     GetTreeFromFile(&tree, DEFAULT_TREE_NAME);
     printf("Tree got\n");
 
     GraphicDump(&tree);
+    printf("Tree dumped\n");
+
     
     PrintfInLatex("$y = $");
 

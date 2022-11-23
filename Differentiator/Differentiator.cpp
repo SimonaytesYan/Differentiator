@@ -46,7 +46,17 @@ static void  PreFuncTexNode(Node* node, void* dfs_fp);
 
 static void  PrintRandBundles(FILE* stream);
 
-static void RemovingNeutralElem(Node* node);
+static void  RemoveNeutralElem(Node* node);
+
+static void  RemoveNeutralPlus(Node* node);
+
+static void RemoveNeutralSub(Node* node);
+
+static void RemoveNeutralMul(Node* node);
+
+static void RemoveNeutralDiv(Node* node);
+
+static void RemoveNeutralPow(Node* node);
 
 //--------------------DSL--------------------
 
@@ -87,6 +97,20 @@ static void RemovingNeutralElem(Node* node);
     VAL_N(node) = func(a);              \
 }
 
+#define CpyAndReplace(from_cpy, for_replace)    \
+{                                               \
+    TexNode(node);                              \
+    PrintfInLatex(" = ")                        \
+    Node* new_node = Cpy(from_cpy);             \
+                                                \
+    DFSNodeDtor(for_replace);                   \
+    *for_replace = *new_node;                   \
+    free(new_node);                             \
+                                                \
+    TexNode(for_replace);                       \
+    PrintfInLatex("\\\\\n")                     \
+}
+
 #define L(node) node->left
 
 #define R(node) node->right
@@ -105,6 +129,10 @@ static void RemovingNeutralElem(Node* node);
 #define IS_OP(node) (node->val.type == TYPE_OP)
 
 #define IS_NUM(node) (node->val.type == TYPE_NUM)
+
+#define IS_ZERO(node) (IS_NUM(node) && VAL_N(node) == 0)
+
+#define IS_ONE(node) (IS_NUM(node) && VAL_N(node) == 1)
 
 
 #define VAL_N(node) node->val.val.dbl
@@ -407,9 +435,9 @@ Node* Cpy(Node* node)
 {
     if (node == nullptr)
         return nullptr;
-    PrintElem(stdout, node);
     
     #ifdef DEBUG
+        PrintElem(stdout, node);
         printf(" node = %p\nleft = %p\nright = %p\n", node, L(node), R(node));
     #endif
 
@@ -728,8 +756,10 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         #endif
 
         val->type    = TYPE_VAR;
-    
-        val->val.var = (char*)calloc(1, strlen(str));
+        val->val.var = (char*)calloc(1, strlen(str) + 1);
+
+        assert(val->val.var);
+
         strcpy(val->val.var, str);
     }
     else
@@ -860,6 +890,7 @@ void SimplifyTree(Tree* tree)
     PrintfInLatex("\n\nУпростим получившееся выражение\n\n");
 
     ConstsConvolution(tree->root);
+    RemoveNeutralElem(tree->root);
 }
 
 void ConstsConvolution(Node* node)
@@ -878,11 +909,8 @@ void ConstsConvolution(Node* node)
     
     PrintRandBundles(LatexFp);
 
-    PrintfInLatex("(");
     TexNode(node);
-    PrintfInLatex(")");
-    
-    PrintfInLatex( " = ");
+    PrintfInLatex(" = ");
 
     switch (VAL_OP(node))
     {
@@ -935,34 +963,83 @@ void ConstsConvolution(Node* node)
     PrintfInLatex("\\\\\n");
 }
 
-static void RemovingNeutralElem(Node* node)
+static void RemoveNeutralPlus(Node* node)
 {
-    if (node == nullptr)
+    assert(node);
+
+    if (IS_ZERO(L(node)))
+        CpyAndReplace(R(node), node)
+    else if (IS_ZERO(R(node)))
+        CpyAndReplace(L(node), node)
+}
+
+static void RemoveNeutralSub(Node* node)
+{
+    assert(node);
+
+    if (IS_ZERO(R(node)))
+        CpyAndReplace(L(node), node)    
+}
+
+static void RemoveNeutralMul(Node* node)
+{
+    assert(node);
+
+    if (IS_ZERO(L(node)) || IS_ZERO(R(node)))
+        CpyAndReplace(NodeCtorNum(0), node)
+    else if (IS_ONE(L(node))) 
+        CpyAndReplace(R(node), node)
+    else if (IS_ONE(R(node)))
+        CpyAndReplace(L(node), node)
+}
+
+static void RemoveNeutralDiv(Node* node)
+{
+    assert(node);
+
+    if (IS_ONE(R(node)))
+        CpyAndReplace(L(node), node)
+    else if (IS_ZERO(L(node)))
+        CpyAndReplace(NodeCtorNum(0), node)
+}
+
+static void RemoveNeutralPow(Node* node)
+{
+    assert(node);
+    
+    if (IS_ONE(L(node)))
+        CpyAndReplace(NodeCtorNum(1), node)
+    else if (IS_ZERO(L(node)))
+        CpyAndReplace(NodeCtorNum(0), node)
+}
+
+static void RemoveNeutralElem(Node* node)
+{
+    if (node == nullptr || L(node) == nullptr || R(node) == nullptr)
         return;
 
-    RemovingNeutralElem(L(node));
-    RemovingNeutralElem(R(node));
+    RemoveNeutralElem(L(node));
+    RemoveNeutralElem(R(node));
 
     switch(VAL_OP(node))
     {
         case OP_PLUS:
-        {
-            if (VAL_N(L(node)) == 0)
-            {
-                Node* new_node = Cpy(R(node));
-
-                DeleteNode(node);
-                node = new_node;
-            }
-            else if (VAL_N(R(node)) == 0)
-            {
-                Node* new_node = Cpy(L(node));
-
-                DeleteNode(node);
-                node = new_node;
-            }
+            RemoveNeutralPlus(node);
             break;
-        }
+        case OP_SUB:
+            RemoveNeutralSub(node);            
+            break;
+        case OP_MUL:
+            RemoveNeutralMul(node);
+            break;
+        case OP_DIV:
+            RemoveNeutralDiv(node);
+            break;
+        case OP_POW:
+            RemoveNeutralPow(node);
+            break;
+        default:
+            break;
     }
 }
 
