@@ -832,7 +832,7 @@ void GetNodeFromFile(Node** node, FILE* fp)
         GetNodeValFromStr(new_object, &(new_node)->val);
 
         if (IS_OP(new_node) && 
-           (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS))
+           (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS || VAL_OP(new_node) == OP_LN))
         {
             DFSNodeDtor(L(new_node));
             L(new_node) = nullptr;
