@@ -59,6 +59,10 @@ static int  TreeIterate(Tree* tree, Node** index);
 
 static void DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* args2, DFS_f post_func, void* args3);
 
+static void DeleteNode(Node* node);
+
+static void DFSNodeDtor(Node* node);
+
 static void DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* args2, DFS_f post_func, void* args3)
 {
     if (node == nullptr)
@@ -282,23 +286,31 @@ static int TreeConstructor(Tree* tree, int line, const char* name, const char* f
     return TreeCheck(tree);
 }
 
+static void DeleteNode(Node* node)
+{
+    DFSNodeDtor(node);
+    free(node);
+}
+
+static void DFSNodeDtor(Node* node)
+{
+    if (node == nullptr)
+        return;
+    
+    DFSNodeDtor(node->left);
+    DFSNodeDtor(node->right);
+
+    free(node->left);
+    free(node->right);
+    node->left  = nullptr;
+    node->right = nullptr;
+}
+
 static int TreeDtor(Tree* tree)
 {
     TreeCheck(tree);
     
-    DFS_f post_function = [](Node* node, void*)
-                            {
-                                free(node->left);
-                                free(node->right);
-                                node->left  = nullptr;
-                                node->right = nullptr;
-                            };
-
-    DFS(tree->root, nullptr,       nullptr,
-                    nullptr,       nullptr,
-                    post_function, nullptr);
-    
-    free(tree->root);
+    DeleteNode(tree->root);
     tree->root = nullptr;
 
     tree->debug.file     = nullptr;

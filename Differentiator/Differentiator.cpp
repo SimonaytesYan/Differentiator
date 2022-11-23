@@ -67,8 +67,8 @@ static void RemovingNeutralElem(Node* node);
     double a = VAL_N(L(node));          \
     double b = VAL_N(R(node));          \
                                         \
-    free(L(node));                      \
-    free(R(node));                      \
+    DeleteNode(L(node));                \
+    DeleteNode(R(node));                \
     L(node) = nullptr;                  \
     R(node) = nullptr;                  \
                                         \
@@ -80,7 +80,7 @@ static void RemovingNeutralElem(Node* node);
 {                                       \
     double a = VAL_N(R(node));          \
                                         \
-    free(R(node));                      \
+    DeleteNode(R(node));                \
     R(node) = nullptr;                  \
                                         \
     TYPE(node)  = TYPE_NUM;             \
@@ -804,7 +804,7 @@ void GetNodeFromFile(Node** node, FILE* fp)
         if (IS_OP(new_node) && 
            (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS))
         {
-            free(L(new_node));
+            DFSNodeDtor(L(new_node));
             L(new_node) = nullptr;
         }
         #ifdef DEBUG
@@ -912,8 +912,9 @@ void ConstsConvolution(Node* node)
         double a = VAL_N(L(node));
         double b = VAL_N(R(node));
 
-        free(L(node));
-        free(R(node));
+        DeleteNode(L(node));
+        DeleteNode(R(node));
+
         L(node) = nullptr;
         R(node) = nullptr;
 
@@ -945,8 +946,23 @@ static void RemovingNeutralElem(Node* node)
     switch(VAL_OP(node))
     {
         case OP_PLUS:
-            //if (VAL_N(L(node_arg)) == 0)
-        break;
+        {
+            if (VAL_N(L(node)) == 0)
+            {
+                Node* new_node = Cpy(R(node));
+
+                DeleteNode(node);
+                node = new_node;
+            }
+            else if (VAL_N(R(node)) == 0)
+            {
+                Node* new_node = Cpy(L(node));
+
+                DeleteNode(node);
+                node = new_node;
+            }
+            break;
+        }
     }
 }
 
