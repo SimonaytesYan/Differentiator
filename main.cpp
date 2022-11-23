@@ -14,6 +14,8 @@ int main()
     TreeCtor(&tree);
     GetTreeFromFile(&tree, DEFAULT_TREE_NAME);
     printf("Tree got\n");
+
+    GraphicDump(&tree);
     
     PrintfInLatex("$y = $");
 

@@ -40,9 +40,13 @@ static Node* DiffSum(Node* node_arg);
 
 static Node* DiffSub(Node* node_arg);
 
-static void PrintRandBundles(FILE* stream);
+static void  PostFuncTexNode(Node* node, void* dfs_fp);
 
-void PrintfInLatexReal(const char* function, const char *format, ...);
+static void  PreFuncTexNode(Node* node, void* dfs_fp);
+
+static void  PrintRandBundles(FILE* stream);
+
+       void PrintfInLatexReal(const char* function, const char *format, ...);
 
 //--------------------DSL--------------------
 
@@ -138,6 +142,16 @@ void PrintfInLatexReal(const char* function, const char *format, ...);
 #define PUT_COS                     \
     case OP_COS:                    \
         fprintf(stream, " cos ");   \
+        break;
+
+#define PUT_LN                      \
+    case OP_LN:                     \
+        fprintf(stream, " ln ");    \
+        break;
+
+#define PUT_POW                      \
+    case OP_POW:                     \
+        fprintf(stream, " ^ ");      \
         break;
 
 //--------------------FUNCTION IMPLEMENTATION--------------------
@@ -288,9 +302,45 @@ static Node* DiffSub(Node* node_arg)
 {
     Node* new_node  = NodeCtorOp(OP_SUB);
 
-    new_node->left  = Diff(node_arg->left);
-    new_node->right = Diff(node_arg->right);
+    L(new_node) = Diff(L(node_arg));
+    R(new_node) = Diff(R(node_arg));
                 
+    ReturnAndTex;
+}
+
+static Node* DiffLn(Node* node_arg)
+{
+    Node* new_node = NodeCtorOp(OP_MUL);
+
+    L(new_node)  = NodeCtorOp(OP_DIV);
+    LL(new_node) = NodeCtorNum(1);
+
+    LR(new_node) = Cpy(R(node_arg));
+    R(new_node)  = Diff(R(node_arg));
+
+    ReturnAndTex;
+}
+
+static Node* DiffPow(Node* node_arg)
+{
+    Node* new_node = NodeCtorOp(OP_MUL);
+
+    L(new_node)  = Cpy(node_arg);
+    R(new_node)  = NodeCtorOp(OP_PLUS);
+
+    RL(new_node) = NodeCtorOp(OP_MUL);
+    RR(new_node) = NodeCtorOp(OP_MUL);
+
+    L(RL(new_node)) = NodeCtorOp(OP_DIV);
+    R(RL(new_node)) = Diff(L(node_arg));
+
+    LL(RL(new_node)) = Cpy(R(node_arg));
+    LR(RL(new_node)) = Cpy(L(node_arg));
+
+    L(RR(new_node))  = Diff(R(node_arg));
+    R(RR(new_node))  = NodeCtorOp(OP_LN);
+    RR(RR(new_node)) = Cpy(L(node_arg));
+
     ReturnAndTex;
 }
 
@@ -327,6 +377,10 @@ Node* Diff(Node* node_arg)
                 return DiffSin(node_arg);
             case OP_COS:
                 return DiffCos(node_arg);
+            case OP_LN:
+                return DiffLn(node_arg);
+            case OP_POW:
+                return DiffPow(node_arg);
 
             case UNDEF_OPER_TYPE:
             {
@@ -363,8 +417,8 @@ Node* Cpy(Node* node)
     new_node->val.type = node->val.type;
     new_node->val.val  = node->val.val;
 
-    new_node->left     = Cpy(node->left);
-    new_node->right    = Cpy(node->right);
+    L(new_node) = Cpy(L(node));
+    R(new_node) = Cpy(R(node));
 
     return new_node;
 }
@@ -416,6 +470,8 @@ static void PrintElem(FILE* stream, Node_t elem)
             PUT_DIV
             PUT_SIN
             PUT_COS
+            PUT_LN
+            PUT_POW
 
             case UNDEF_OPER_TYPE:
                 fprintf(stream, "?");
@@ -496,6 +552,14 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
                 fprintf(stream, "cos(");
                 break;
 
+            case OP_LN:
+                fprintf(stream, "ln(");
+                break;
+
+            case OP_POW:
+                fprintf(stream, "^{");
+                break;
+
             case OP_MUL:
                 fprintf(stream, " \\cdot ");
                 break;
@@ -552,7 +616,8 @@ static void PreFuncTexNode(Node* node, void* dfs_fp)
         fprintf(stream, "\\frac{");
     else if (!IS_NUM(val) && !IS_VAR(val))
     {
-        if (VAL_OP(val) != OP_SIN && VAL_OP(val) != OP_COS)
+        if (VAL_OP(val) != OP_SIN && VAL_OP(val) != OP_COS && 
+            VAL_OP(val) != OP_LN && VAL_OP(val) != OP_POW)
             fprintf(stream, "(");
     }
 }
@@ -562,7 +627,7 @@ static void PostFuncTexNode(Node* node, void* dfs_fp)
     FILE* stream = (FILE*)dfs_fp;
     Node_t val = node->val;
 
-    if (IS_OP(val) && VAL_OP(val) == OP_DIV)
+    if (IS_OP(val) && (VAL_OP(val) == OP_DIV || VAL_OP(val) == OP_POW))
         fprintf(stream, "}");
     else if (!IS_NUM(val) && !IS_VAR(val))
         fprintf(stream, ")");
@@ -646,6 +711,17 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
 
         val->type   = TYPE_OP;
         val->val.op = OP_COS;
+    }
+    else if (strcmp(str, "ln") == 0)
+    {
+
+        val->type   = TYPE_OP;
+        val->val.op = OP_LN; 
+    }
+    else if (strcmp(str, "^") == 0)
+    {
+        val->type   = TYPE_OP;
+        val->val.op = OP_POW;
     }
     else if (atof(str) == 0 && strcmp(str, "0"))
     {
@@ -832,6 +908,23 @@ void ConstsConvolution(Node* node_arg)
     case OP_COS:
         UnaryConstConv(cos);
         break;
+    case OP_LN:
+        UnaryConstConv(log);
+        break;
+    case OP_POW:
+    {
+        double a = VAL_N(L(node_arg)->val);
+        double b = VAL_N(R(node_arg)->val);
+
+        free(L(node_arg));
+        free(R(node_arg));
+        L(node_arg) = nullptr;
+        R(node_arg) = nullptr;
+
+        node_arg->val.type   = TYPE_NUM;
+        VAL_N(node_arg->val) = pow(a, b);
+        break;
+    }
     case UNDEF_OPER_TYPE:
         assert(1 || "undef operator");
         break;
@@ -844,6 +937,8 @@ void ConstsConvolution(Node* node_arg)
     TexNode(node_arg);
     PrintfInLatex("\\\\\n");
 }
+
+
 
 const char* s = nullptr;
 
