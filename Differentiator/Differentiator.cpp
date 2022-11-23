@@ -16,7 +16,7 @@ static FILE* LatexFp = nullptr;
 
 static void  GetNodeValFromStr(const char str[], Node_t* val);
 
-static void  PrintElem(FILE* stream, Node_t elem);
+static void  PrintElem(FILE* stream, Node* elem);
 
 static void  PrintfInLatexEndDoc();
 
@@ -46,7 +46,7 @@ static void  PreFuncTexNode(Node* node, void* dfs_fp);
 
 static void  PrintRandBundles(FILE* stream);
 
-       void PrintfInLatexReal(const char* function, const char *format, ...);
+static void RemovingNeutralElem(Node* node);
 
 //--------------------DSL--------------------
 
@@ -54,7 +54,7 @@ static void  PrintRandBundles(FILE* stream);
     PrintRandBundles(LatexFp);      \
                                     \
     PrintfInLatex("(");             \
-    TexNode(node_arg);              \
+    TexNode(node);                  \
     PrintfInLatex(")`");            \
                                     \
     PrintfInLatex( " = ");          \
@@ -64,27 +64,27 @@ static void  PrintRandBundles(FILE* stream);
 
 #define BinaryConstConv(oper)           \
 {                                       \
-    double a = VAL_N(L(node_arg)->val); \
-    double b = VAL_N(R(node_arg)->val); \
+    double a = VAL_N(L(node));          \
+    double b = VAL_N(R(node));          \
                                         \
-    free(L(node_arg));                  \
-    free(R(node_arg));                  \
-    L(node_arg) = nullptr;              \
-    R(node_arg) = nullptr;              \
+    free(L(node));                      \
+    free(R(node));                      \
+    L(node) = nullptr;                  \
+    R(node) = nullptr;                  \
                                         \
-    node_arg->val.type   = TYPE_NUM;    \
-    VAL_N(node_arg->val) = a oper b;    \
+    TYPE(node)   = TYPE_NUM;            \
+    VAL_N(node) = a oper b;             \
 }
 
 #define UnaryConstConv(func)            \
 {                                       \
-    double a = VAL_N(R(node_arg)->val); \
+    double a = VAL_N(R(node));          \
                                         \
-    free(R(node_arg));                  \
-    R(node_arg) = nullptr;              \
+    free(R(node));                      \
+    R(node) = nullptr;                  \
                                         \
-    node_arg->val.type   = TYPE_NUM;    \
-    VAL_N(node_arg->val) = func(a);     \
+    TYPE(node)  = TYPE_NUM;             \
+    VAL_N(node) = func(a);              \
 }
 
 #define L(node) node->left
@@ -100,18 +100,20 @@ static void  PrintRandBundles(FILE* stream);
 #define RR(node) node->right->right
 
 
-#define IS_VAR(node) (node.type == TYPE_VAR)
+#define IS_VAR(node) (node->val.type == TYPE_VAR)
 
-#define IS_OP(node) (node.type == TYPE_OP)
+#define IS_OP(node) (node->val.type == TYPE_OP)
 
-#define IS_NUM(node) (node.type == TYPE_NUM)
+#define IS_NUM(node) (node->val.type == TYPE_NUM)
 
 
-#define VAL_N(node) node.val.dbl
+#define VAL_N(node) node->val.val.dbl
 
-#define VAL_OP(node) node.val.op
+#define VAL_OP(node) node->val.val.op
 
-#define VAL_VAR(node) node.val.var
+#define VAL_VAR(node) node->val.val.var
+
+#define TYPE(node) node->val.type
 
 
 #define PUT_PLUS                    \
@@ -219,7 +221,7 @@ static Node* NodeCtorOp(OPER_TYPES val)
     return new_node;
 }
 
-static Node* DiffDiv(Node* node_arg)
+static Node* DiffDiv(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_DIV);
 
@@ -229,19 +231,19 @@ static Node* DiffDiv(Node* node_arg)
     LL(new_node) = NodeCtorOp(OP_MUL); 
     LR(new_node) = NodeCtorOp(OP_MUL);
 
-    L(LL(new_node)) = Diff(L(node_arg));
-    R(LL(new_node)) = Cpy(R(node_arg));
+    L(LL(new_node)) = Diff(L(node));
+    R(LL(new_node)) = Cpy(R(node));
             
-    L(LR(new_node)) = Diff(R(node_arg));
-    R(LR(new_node)) = Cpy(L(node_arg));
+    L(LR(new_node)) = Diff(R(node));
+    R(LR(new_node)) = Cpy(L(node));
 
-    RR(new_node) = Cpy(R(node_arg));
-    RL(new_node) = Cpy(R(node_arg));
+    RR(new_node) = Cpy(R(node));
+    RL(new_node) = Cpy(R(node));
 
     ReturnAndTex;
 }
 
-static Node* DiffMult(Node* node_arg)
+static Node* DiffMult(Node* node)
 {
     Node* new_node   = NodeCtorOp(OP_PLUS);
     Node* left_node  = NodeCtorOp(OP_MUL);
@@ -250,104 +252,103 @@ static Node* DiffMult(Node* node_arg)
     L(new_node) = left_node;
     R(new_node) = right_node;
 
-    LL(new_node) = Diff(L(node_arg));
-    LR(new_node) = Cpy(R(node_arg));
+    LL(new_node) = Diff(L(node));
+    LR(new_node) = Cpy(R(node));
 
-    RL(new_node) = Cpy(L(node_arg));
-    RR(new_node) = Diff(R(node_arg));
+    RL(new_node) = Cpy(L(node));
+    RR(new_node) = Diff(R(node));
 
     ReturnAndTex;
 }
 
-static Node* DiffSin(Node* node_arg)
+static Node* DiffSin(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
-    L(new_node) = Diff(R(node_arg));
+    L(new_node) = Diff(R(node));
     R(new_node) = NodeCtorOp(OP_COS);
 
     RL(new_node) = nullptr;
-    RR(new_node) = Cpy(R(node_arg));
+    RR(new_node) = Cpy(R(node));
 
     ReturnAndTex;
 }
 
-static Node* DiffCos(Node* node_arg)
+static Node* DiffCos(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
-    L(new_node)  = Diff(R(node_arg));
+    L(new_node)  = Diff(R(node));
     R(new_node)  = NodeCtorOp(OP_SUB);
 
     RR(new_node) = NodeCtorOp(OP_SIN);
     RL(new_node) = NodeCtorNum(0);
 
     L(RR(new_node)) = nullptr;
-    R(RR(new_node)) = Cpy(R(node_arg));
+    R(RR(new_node)) = Cpy(R(node));
 
     ReturnAndTex;
 }
 
-static Node* DiffSum(Node* node_arg)
+static Node* DiffSum(Node* node)
 {
     Node* new_node  = NodeCtorOp(OP_PLUS);
 
-    new_node->left  = Diff(node_arg->left);
-    new_node->right = Diff(node_arg->right);
+    new_node->left  = Diff(L(node));
+    new_node->right = Diff(R(node));
 
     ReturnAndTex;
 }
 
-static Node* DiffSub(Node* node_arg)
+static Node* DiffSub(Node* node)
 {
     Node* new_node  = NodeCtorOp(OP_SUB);
 
-    L(new_node) = Diff(L(node_arg));
-    R(new_node) = Diff(R(node_arg));
+    L(new_node) = Diff(L(node));
+    R(new_node) = Diff(R(node));
                 
     ReturnAndTex;
 }
 
-static Node* DiffLn(Node* node_arg)
+static Node* DiffLn(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
     L(new_node)  = NodeCtorOp(OP_DIV);
     LL(new_node) = NodeCtorNum(1);
 
-    LR(new_node) = Cpy(R(node_arg));
-    R(new_node)  = Diff(R(node_arg));
+    LR(new_node) = Cpy(R(node));
+    R(new_node)  = Diff(R(node));
 
     ReturnAndTex;
 }
 
-static Node* DiffPow(Node* node_arg)
+static Node* DiffPow(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
-    L(new_node)  = Cpy(node_arg);
+    L(new_node)  = Cpy(node);
     R(new_node)  = NodeCtorOp(OP_PLUS);
 
     RL(new_node) = NodeCtorOp(OP_MUL);
     RR(new_node) = NodeCtorOp(OP_MUL);
 
     L(RL(new_node)) = NodeCtorOp(OP_DIV);
-    R(RL(new_node)) = Diff(L(node_arg));
+    R(RL(new_node)) = Diff(L(node));
 
-    LL(RL(new_node)) = Cpy(R(node_arg));
-    LR(RL(new_node)) = Cpy(L(node_arg));
+    LL(RL(new_node)) = Cpy(R(node));
+    LR(RL(new_node)) = Cpy(L(node));
 
-    L(RR(new_node))  = Diff(R(node_arg));
+    L(RR(new_node))  = Diff(R(node));
     R(RR(new_node))  = NodeCtorOp(OP_LN);
-    RR(RR(new_node)) = Cpy(L(node_arg));
+    RR(RR(new_node)) = Cpy(L(node));
 
     ReturnAndTex;
 }
 
-Node* Diff(Node* node_arg)
+Node* Diff(Node* node)
 {
-    assert(node_arg);
-    Node_t node = node_arg->val;
+    assert(node);
 
     if (IS_NUM(node))
     {
@@ -366,21 +367,21 @@ Node* Diff(Node* node_arg)
         switch (VAL_OP(node))
         {
             case OP_PLUS:
-                return DiffSum(node_arg);
+                return DiffSum(node);
             case OP_SUB:
-                return DiffSub(node_arg);
+                return DiffSub(node);
             case OP_MUL:
-                return DiffMult(node_arg);
+                return DiffMult(node);
             case OP_DIV:
-                return DiffDiv(node_arg);
+                return DiffDiv(node);
             case OP_SIN:
-                return DiffSin(node_arg);
+                return DiffSin(node);
             case OP_COS:
-                return DiffCos(node_arg);
+                return DiffCos(node);
             case OP_LN:
-                return DiffLn(node_arg);
+                return DiffLn(node);
             case OP_POW:
-                return DiffPow(node_arg);
+                return DiffPow(node);
 
             case UNDEF_OPER_TYPE:
             {
@@ -398,7 +399,7 @@ Node* Diff(Node* node_arg)
     }
 
     LogPrintf("Unknown node type\n"
-              "Node type = %d\n", node.type);
+              "Node type = %d\n", TYPE(node));
     return nullptr;
 }
 
@@ -406,7 +407,7 @@ Node* Cpy(Node* node)
 {
     if (node == nullptr)
         return nullptr;
-    PrintElem(stdout, node->val);
+    PrintElem(stdout, node);
     
     #ifdef DEBUG
         printf(" node = %p\nleft = %p\nright = %p\n", node, L(node), R(node));
@@ -437,7 +438,7 @@ int SaveTreeInFile(Tree* tree, const char file_name[])
 
     DFS_f in_function  = [](Node* node, void* dfs_fp)
                         {
-                            PrintElem((FILE*)dfs_fp, node->val);
+                            PrintElem((FILE*)dfs_fp, node);
                         };
 
     DFS_f post_function = [](Node*, void* dfs_fp)
@@ -454,9 +455,9 @@ int SaveTreeInFile(Tree* tree, const char file_name[])
     return 0;
 }
 
-static void PrintElem(FILE* stream, Node_t elem)
+static void PrintElem(FILE* stream, Node* elem)
 {
-    switch (elem.type)
+    switch (TYPE(elem))
     {
     case TYPE_VAR:  
         fprintf(stream, "%s", VAL_VAR(elem));
@@ -496,9 +497,9 @@ static void PrintElem(FILE* stream, Node_t elem)
 void PrintElemInLog(Node_t elem)
 {
     LogPrintf("type = %d\n" "{\n", elem.type);
-    LogPrintf("\tdbl  = %lg\n", VAL_N(elem));
-    LogPrintf("\top   = %d\n", VAL_OP(elem));
-    LogPrintf("\tvar  = <%s?\n", VAL_VAR(elem));
+    LogPrintf("\tdbl  = %lg\n", elem.val.dbl);
+    LogPrintf("\top   = %d\n", elem.val.op);
+    LogPrintf("\tvar  = <%s?\n", elem.val.var);
     LogPrintf("}\n");
 }
 
@@ -531,15 +532,14 @@ static void PrintfInLatexEndDoc()
 static void PrintElemInLatex(Node* node, void* dfs_fp)
 {
     FILE* stream = (FILE*)dfs_fp;
-    Node_t val = node->val;
 
-    switch (node->val.type)
+    switch (TYPE(node))
     {
     case TYPE_VAR:  
-        fprintf(stream, "%s", VAL_VAR(val));
+        fprintf(stream, "%s", VAL_VAR(node));
         break;
     case TYPE_OP:
-        switch(VAL_OP(val))
+        switch(VAL_OP(node))
         {
             PUT_PLUS
             PUT_SUB
@@ -578,7 +578,7 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
         }
         break;
     case TYPE_NUM:
-        fprintf(stream, "%lg", VAL_N(val));
+        fprintf(stream, "%lg", VAL_N(node));
         break;
     case UNDEF_NODE_TYPE:
         fprintf(stream, "\n");
@@ -610,14 +610,13 @@ void CloseLatexFile()
 static void PreFuncTexNode(Node* node, void* dfs_fp)
 {
     FILE* stream = (FILE*)dfs_fp;
-    Node_t val = node->val;
                             
-    if (IS_OP(val) && VAL_OP(val) == OP_DIV)
+    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
         fprintf(stream, "\\frac{");
-    else if (!IS_NUM(val) && !IS_VAR(val))
+    else if (!IS_NUM(node) && !IS_VAR(node))
     {
-        if (VAL_OP(val) != OP_SIN && VAL_OP(val) != OP_COS && 
-            VAL_OP(val) != OP_LN && VAL_OP(val) != OP_POW)
+        if (VAL_OP(node) != OP_SIN && VAL_OP(node) != OP_COS && 
+            VAL_OP(node) != OP_LN && VAL_OP(node) != OP_POW)
             fprintf(stream, "(");
     }
 }
@@ -625,11 +624,10 @@ static void PreFuncTexNode(Node* node, void* dfs_fp)
 static void PostFuncTexNode(Node* node, void* dfs_fp)
 {
     FILE* stream = (FILE*)dfs_fp;
-    Node_t val = node->val;
 
-    if (IS_OP(val) && (VAL_OP(val) == OP_DIV || VAL_OP(val) == OP_POW))
+    if (IS_OP(node) && (VAL_OP(node) == OP_DIV || VAL_OP(node) == OP_POW))
         fprintf(stream, "}");
-    else if (!IS_NUM(val) && !IS_VAR(val))
+    else if (!IS_NUM(node) && !IS_VAR(node))
         fprintf(stream, ")");
 }
 
@@ -803,8 +801,8 @@ void GetNodeFromFile(Node** node, FILE* fp)
 
         GetNodeValFromStr(new_object, &(new_node)->val);
 
-        if (new_node->val.type == TYPE_OP && 
-           (VAL_OP(new_node->val) == OP_SIN || VAL_OP(new_node->val) == OP_COS))
+        if (IS_OP(new_node) && 
+           (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS))
         {
             free(L(new_node));
             L(new_node) = nullptr;
@@ -864,26 +862,24 @@ void SimplifyTree(Tree* tree)
     ConstsConvolution(tree->root);
 }
 
-void ConstsConvolution(Node* node_arg)
+void ConstsConvolution(Node* node)
 {
-    if (node_arg == nullptr)
+    if (node == nullptr)
         return;
 
-    ConstsConvolution(node_arg->left);
-    ConstsConvolution(node_arg->right);
+    ConstsConvolution(L(node));
+    ConstsConvolution(R(node));
 
-    Node_t node = node_arg->val;
-
-    if (node.type != TYPE_OP)
+    if (TYPE(node) != TYPE_OP)
         return;
 
-    if ((L(node_arg) != nullptr && !IS_NUM(L(node_arg)->val)) || !IS_NUM(R(node_arg)->val))
+    if ((L(node) != nullptr && !IS_NUM(L(node))) || !IS_NUM(R(node)))
         return;
     
     PrintRandBundles(LatexFp);
 
     PrintfInLatex("(");
-    TexNode(node_arg);
+    TexNode(node);
     PrintfInLatex(")");
     
     PrintfInLatex( " = ");
@@ -913,16 +909,16 @@ void ConstsConvolution(Node* node_arg)
         break;
     case OP_POW:
     {
-        double a = VAL_N(L(node_arg)->val);
-        double b = VAL_N(R(node_arg)->val);
+        double a = VAL_N(L(node));
+        double b = VAL_N(R(node));
 
-        free(L(node_arg));
-        free(R(node_arg));
-        L(node_arg) = nullptr;
-        R(node_arg) = nullptr;
+        free(L(node));
+        free(R(node));
+        L(node) = nullptr;
+        R(node) = nullptr;
 
-        node_arg->val.type   = TYPE_NUM;
-        VAL_N(node_arg->val) = pow(a, b);
+        TYPE(node)  = TYPE_NUM;
+        VAL_N(node) = pow(a, b);
         break;
     }
     case UNDEF_OPER_TYPE:
@@ -934,11 +930,25 @@ void ConstsConvolution(Node* node_arg)
         break;
     }
     
-    TexNode(node_arg);
+    TexNode(node);
     PrintfInLatex("\\\\\n");
 }
 
+static void RemovingNeutralElem(Node* node)
+{
+    if (node == nullptr)
+        return;
 
+    RemovingNeutralElem(L(node));
+    RemovingNeutralElem(R(node));
+
+    switch(VAL_OP(node))
+    {
+        case OP_PLUS:
+            //if (VAL_N(L(node_arg)) == 0)
+        break;
+    }
+}
 
 const char* s = nullptr;
 

@@ -143,6 +143,12 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
         case OP_POW:
             fprintf(fp, "^");
             break;
+        case UNDEF_OPER_TYPE:
+            fprintf(fp, "?");
+            break;
+        default:
+            fprintf(fp, "#");
+            break;
     }
 
     fprintf(fp, " |%lf } | { <l> %06X  |<r>  %06X}}\"]\n",
