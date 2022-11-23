@@ -986,7 +986,11 @@ static void RemoveNeutralMul(Node* node)
     assert(node);
 
     if (IS_ZERO(L(node)) || IS_ZERO(R(node)))
-        CpyAndReplace(NodeCtorNum(0), node)
+    {
+        Node* new_node = NodeCtorNum(0);
+        CpyAndReplace(new_node, node);
+        free(new_node);
+    }
     else if (IS_ONE(L(node))) 
         CpyAndReplace(R(node), node)
     else if (IS_ONE(R(node)))
@@ -1000,7 +1004,11 @@ static void RemoveNeutralDiv(Node* node)
     if (IS_ONE(R(node)))
         CpyAndReplace(L(node), node)
     else if (IS_ZERO(L(node)))
-        CpyAndReplace(NodeCtorNum(0), node)
+    {
+        Node* new_node = NodeCtorNum(0);
+        CpyAndReplace(new_node, node);
+        free(new_node);
+    }
 }
 
 static void RemoveNeutralPow(Node* node)
@@ -1008,9 +1016,17 @@ static void RemoveNeutralPow(Node* node)
     assert(node);
     
     if (IS_ONE(L(node)))
-        CpyAndReplace(NodeCtorNum(1), node)
+    {
+        Node* new_node = NodeCtorNum(1);
+        CpyAndReplace(new_node, node);
+        free(new_node);
+    }
     else if (IS_ZERO(L(node)))
-        CpyAndReplace(NodeCtorNum(0), node)
+    {
+        Node* new_node = NodeCtorNum(0);
+        CpyAndReplace(new_node, node);
+        free(new_node);
+    }
 }
 
 static void RemoveNeutralElem(Node* node)
