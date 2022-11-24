@@ -58,18 +58,20 @@ static void RemoveNeutralDiv(Node* node);
 
 static void RemoveNeutralPow(Node* node);
 
+static int  GetOpRank(OPER_TYPES operation);
+
 //--------------------DSL--------------------
 
-#define ReturnAndTex                \
-    PrintRandBundles(LatexFp);      \
-                                    \
-    PrintfInLatex("(");             \
-    TexNode(node);                  \
-    PrintfInLatex(")`");            \
-                                    \
-    PrintfInLatex( " = ");          \
-    TexNode(new_node);              \
-    PrintfInLatex("\\\\\n");        \
+#define ReturnAndTex                        \
+    PrintRandBundles(LatexFp);              \
+                                            \
+    PrintfInLatex("\\begin{center}\n""(");  \
+    TexNode(node);                          \
+    PrintfInLatex(")`\n");                  \
+                                            \
+    PrintfInLatex( " = ");                  \
+    TexNode(new_node);                      \
+    PrintfInLatex("\\end{center}\n"); \
     return new_node;
 
 #define BinaryConstConv(oper)           \
@@ -99,16 +101,17 @@ static void RemoveNeutralPow(Node* node);
 
 #define CpyAndReplace(from_cpy, for_replace)    \
 {                                               \
+    PrintfInLatex("\\begin{center}\n");         \
     TexNode(node);                              \
-    PrintfInLatex(" = ")                        \
-    Node* new_node = Cpy(from_cpy);             \
+    Node* node_for_replace = Cpy(from_cpy);     \
                                                 \
     DFSNodeDtor(for_replace);                   \
-    *for_replace = *new_node;                   \
-    free(new_node);                             \
+    *for_replace = *node_for_replace;           \
+    free(node_for_replace);                     \
                                                 \
+    PrintfInLatex("=");                         \
     TexNode(for_replace);                       \
-    PrintfInLatex("\\\\\n")                     \
+    PrintfInLatex("\\end{center}\n");           \
 }
 
 #define L(node) node->left
@@ -668,7 +671,7 @@ int TexNode(Node* root)
         printf("Start tex\n");    
     #endif
 
-    PrintfInLatex( "$");
+    PrintfInLatex("$");
 
     DFS(root, PreFuncTexNode,   LatexFp,
               PrintElemInLatex, LatexFp,
@@ -888,9 +891,15 @@ void SimplifyTree(Tree* tree)
     assert(tree);
 
     PrintfInLatex("\n\nУпростим получившееся выражение\n\n");
-
-    ConstsConvolution(tree->root);
-    RemoveNeutralElem(tree->root);
+    
+    Node* old_tree = nullptr;
+    do
+    {
+        old_tree = Cpy(tree->root);
+        ConstsConvolution(tree->root);
+        RemoveNeutralElem(tree->root);
+    }
+    while(NodeCmp(old_tree, tree->root));
 }
 
 void ConstsConvolution(Node* node)
@@ -909,6 +918,7 @@ void ConstsConvolution(Node* node)
     
     PrintRandBundles(LatexFp);
 
+    PrintfInLatex("\\begin{center}\n");
     TexNode(node);
     PrintfInLatex(" = ");
 
@@ -960,7 +970,7 @@ void ConstsConvolution(Node* node)
     }
     
     TexNode(node);
-    PrintfInLatex("\\\\\n");
+    PrintfInLatex("\\end{center}\n");
 }
 
 static void RemoveNeutralPlus(Node* node)

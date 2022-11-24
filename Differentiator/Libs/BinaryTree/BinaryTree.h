@@ -63,6 +63,24 @@ static void DeleteNode(Node* node);
 
 static void DFSNodeDtor(Node* node);
 
+static int NodeCmp(Node* node_a, Node* node_b);
+
+int NodeCmp(Node* node_a, Node* node_b)
+{
+    if (node_a == nullptr && node_b == nullptr)
+        return 0;
+    if (node_a == nullptr || node_b == nullptr)
+        return 1;
+
+    if (NodeCmp(node_a->left, node_b->left) != 0)
+        return 1;
+    
+    if (NodeCmp(node_a->right, node_b->right) != 0)
+        return 1;
+    
+    return 0;
+}
+
 static void DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* args2, DFS_f post_func, void* args3)
 {
     if (node == nullptr)
