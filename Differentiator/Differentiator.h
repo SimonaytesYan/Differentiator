@@ -61,7 +61,7 @@ void  CloseLatexFile();
 
 Node* Diff(Node* node);
 
-Node* Cpy(Node* node);
+Node* CpyNode(Node* node);
 
 void  PrintfInLatex(const char *format, ...);
 

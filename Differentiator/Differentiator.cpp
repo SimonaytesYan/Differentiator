@@ -95,18 +95,18 @@ static int  GetOpRank(OPER_TYPES operation);
     VAL_N(node) = func(a);              \
 }
 
-#define CpyAndReplace(from_cpy, for_replace)    \
+#define CpyAndReplace(from_cpy, replace_it)     \
 {                                               \
     PrintfInLatex("\\begin{center}\n")          \
     TexNode(node);                              \
-    Node* node_for_replace = Cpy(from_cpy);     \
+    Node* replacement = CpyNode(from_cpy);      \
                                                 \
-    DFSNodeDtor(for_replace);                   \
-    *for_replace = *node_for_replace;           \
-    free(node_for_replace);                     \
+    DelLR(replace_it);                          \
+    *replace_it = *replacement;                 \
+    free(replacement);                          \
                                                 \
     PrintfInLatex("=")                          \
-    TexNode(for_replace);                       \
+    TexNode(replace_it);                        \
     PrintfInLatex("\\end{center}\n")            \
 }
 
@@ -299,13 +299,13 @@ static Node* DiffDiv(Node* node)
     LR(new_node) = NodeCtorOp(OP_MUL);
 
     L(LL(new_node)) = Diff(L(node));
-    R(LL(new_node)) = Cpy(R(node));
+    R(LL(new_node)) = CpyNode(R(node));
             
     L(LR(new_node)) = Diff(R(node));
-    R(LR(new_node)) = Cpy(L(node));
+    R(LR(new_node)) = CpyNode(L(node));
 
-    RR(new_node) = Cpy(R(node));
-    RL(new_node) = Cpy(R(node));
+    RR(new_node) = CpyNode(R(node));
+    RL(new_node) = CpyNode(R(node));
 
     ReturnAndTex;
 }
@@ -320,9 +320,9 @@ static Node* DiffMult(Node* node)
     R(new_node) = right_node;
 
     LL(new_node) = Diff(L(node));
-    LR(new_node) = Cpy(R(node));
+    LR(new_node) = CpyNode(R(node));
 
-    RL(new_node) = Cpy(L(node));
+    RL(new_node) = CpyNode(L(node));
     RR(new_node) = Diff(R(node));
 
     ReturnAndTex;
@@ -336,7 +336,7 @@ static Node* DiffSin(Node* node)
     R(new_node) = NodeCtorOp(OP_COS);
 
     RL(new_node) = nullptr;
-    RR(new_node) = Cpy(R(node));
+    RR(new_node) = CpyNode(R(node));
 
     ReturnAndTex;
 }
@@ -352,7 +352,7 @@ static Node* DiffCos(Node* node)
     RL(new_node) = NodeCtorNum(0);
 
     L(RR(new_node)) = nullptr;
-    R(RR(new_node)) = Cpy(R(node));
+    R(RR(new_node)) = CpyNode(R(node));
 
     ReturnAndTex;
 }
@@ -384,7 +384,7 @@ static Node* DiffLn(Node* node)
     L(new_node)  = NodeCtorOp(OP_DIV);
     LL(new_node) = NodeCtorNum(1);
 
-    LR(new_node) = Cpy(R(node));
+    LR(new_node) = CpyNode(R(node));
     R(new_node)  = Diff(R(node));
 
     ReturnAndTex;
@@ -394,7 +394,7 @@ static Node* DiffPow(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
-    L(new_node)  = Cpy(node);
+    L(new_node)  = CpyNode(node);
     R(new_node)  = NodeCtorOp(OP_PLUS);
 
     RL(new_node) = NodeCtorOp(OP_MUL);
@@ -403,12 +403,12 @@ static Node* DiffPow(Node* node)
     L(RL(new_node)) = NodeCtorOp(OP_DIV);
     R(RL(new_node)) = Diff(L(node));
 
-    LL(RL(new_node)) = Cpy(R(node));
-    LR(RL(new_node)) = Cpy(L(node));
+    LL(RL(new_node)) = CpyNode(R(node));
+    LR(RL(new_node)) = CpyNode(L(node));
 
     L(RR(new_node))  = Diff(R(node));
     R(RR(new_node))  = NodeCtorOp(OP_LN);
-    RR(RR(new_node)) = Cpy(L(node));
+    RR(RR(new_node)) = CpyNode(L(node));
 
     ReturnAndTex;
 }
@@ -470,7 +470,7 @@ Node* Diff(Node* node)
     return nullptr;
 }
 
-Node* Cpy(Node* node)
+Node* CpyNode(Node* node)
 {
     if (node == nullptr)
         return nullptr;
@@ -484,9 +484,14 @@ Node* Cpy(Node* node)
 
     new_node->val.type = node->val.type;
     new_node->val.val  = node->val.val;
+    if (TYPE(new_node) == TYPE_VAR)
+    {
+        VAL_VAR(new_node) = (char*)calloc(1, strlen(VAL_VAR(node)) + 1);
+        strcpy(VAL_VAR(new_node), VAL_VAR(node));
+    }
 
-    L(new_node) = Cpy(L(node));
-    R(new_node) = Cpy(R(node));
+    L(new_node) = CpyNode(L(node));
+    R(new_node) = CpyNode(R(node));
 
     return new_node;
 }
@@ -630,11 +635,13 @@ static void PreFuncTexNode(Node* node, void* dfs_fp)
 
 static void PrintElemInLatex(Node* node, void* dfs_fp)
 {
+    assert(node);
+
     FILE* stream = (FILE*)dfs_fp;
 
     switch (TYPE(node))
     {
-    case TYPE_VAR:  
+    case TYPE_VAR:
         fprintf(stream, "%s", VAL_VAR(node));
         break;
     case TYPE_OP:
@@ -933,7 +940,7 @@ void SimplifyTree(Tree* tree)
     do
     {
         DeleteNode(old_tree);
-        old_tree = Cpy(tree->root);
+        old_tree = CpyNode(tree->root);
 
         ConstsConvolution(tree->root);
         RemoveNeutralElem(tree->root);
