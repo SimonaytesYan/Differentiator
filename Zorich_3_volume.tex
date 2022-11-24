@@ -13,51 +13,49 @@
 \parskip=8pt
 \pagestyle{empty}
 \begin{document}
-$y = $$\frac{sin(ln(x^{cos(x)}))}{ln((1 - (5 \cdot x^{3})))}$
+$y = $$\frac{sin(ln(x^{cos(x)}))}{ln((1 - (5 \cdot x^{3})))}$\newpage \textbf{\Huge Продиффиринцируем эту функцию}
 
- Продиффиринцируем эту функцию
-
-Оказывается
+Имеем
 
 \begin{center}
 ($x$)`
  = $1$\end{center}
-Обоснование этого пререхода предостовляется читателю в качестве несложного упрожнения
+И хотя клуб любителей таких формул двумя блоками ниже, мы продолжаем
 
 \begin{center}
 ($x$)`
  = $1$\end{center}
-Дураку понятно, что
+\\ title{не сложно заметить} 
 
 \begin{center}
 ($cos(x)$)`
  = $(1 \cdot (0 - sin(x)))$\end{center}
-И хотя клуб любителей таких формул двумя блоками ниже, мы продолжаем
+Поэтому
 
 \begin{center}
 ($x^{cos(x)}$)`
  = $(x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x))))$\end{center}
-От коробки до нк все знают, что
+Отметим, что
 
 \begin{center}
 ($ln(x^{cos(x)})$)`
  = $(\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x)))))$\end{center}
-Поэтому
+Откуда
 
 \begin{center}
 ($sin(ln(x^{cos(x)}))$)`
  = $((\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x))))) \cdot cos(ln(x^{cos(x)})))$\end{center}
-Если посмотреть на выражение под другим углом, можно получить
+По теореме Эскобара
 
 \begin{center}
 ($1$)`
  = $0$\end{center}
-Таким образом
+По теореме Эскобара
 
 \begin{center}
 ($5$)`
  = $0$\end{center}
-\\ title{не сложно заметить} 
+Телец в козероге, поэтому
 
 \begin{center}
 ($x$)`
@@ -67,34 +65,32 @@ $y = $$\frac{sin(ln(x^{cos(x)}))}{ln((1 - (5 \cdot x^{3})))}$
 \begin{center}
 ($3$)`
  = $0$\end{center}
-Дураку понятно, что
+Если посмотреть на выражение под другим углом, можно получить
 
 \begin{center}
 ($x^{3}$)`
  = $(x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x))))$\end{center}
-Обоснование этого пререхода предостовляется читателю в качестве несложного упрожнения
+Вы не шокированы?
 
 \begin{center}
 ($(5 \cdot x^{3})$)`
  = $((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x))))))$\end{center}
-Автору приснилось, что следующее преобразование верно
+Оказывается
 
 \begin{center}
 ($(1 - (5 \cdot x^{3}))$)`
  = $(0 - ((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x)))))))$\end{center}
-Таким образом
+Если вы не понимаете этот переход, то я вам сочувствую
 
 \begin{center}
 ($ln((1 - (5 \cdot x^{3})))$)`
  = $(\frac{1}{(1 - (5 \cdot x^{3}))} \cdot (0 - ((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x))))))))$\end{center}
-Дураку понятно, что
+Поэтому
 
 \begin{center}
 ($\frac{sin(ln(x^{cos(x)}))}{ln((1 - (5 \cdot x^{3})))}$)`
  = $\frac{((((\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x))))) \cdot cos(ln(x^{cos(x)}))) \cdot ln((1 - (5 \cdot x^{3})))) - ((\frac{1}{(1 - (5 \cdot x^{3}))} \cdot (0 - ((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x)))))))) \cdot sin(ln(x^{cos(x)}))))}{(ln((1 - (5 \cdot x^{3}))) \cdot ln((1 - (5 \cdot x^{3}))))}$\end{center}
-
-
-Упростим получившееся выражение
+\newpage \textbf{\LARGE Упростим получившееся выражение}
 
 \begin{center}
 $(\frac{cos(x)}{x} \cdot 1)$=$\frac{cos(x)}{x}$\end{center}
@@ -110,9 +106,7 @@ $(0 \cdot ln(x))$=$0$\end{center}
 $(\frac{3}{x} + 0)$=$\frac{3}{x}$\end{center}
 \begin{center}
 $(0 + (5 \cdot (x^{3} \cdot \frac{3}{x})))$=$(5 \cdot (x^{3} \cdot \frac{3}{x}))$\end{center}
-
-
- Получаем выражение
+\newpage \textbf{\Huge Получаем выражение}
 
 $\frac{((((\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot (\frac{cos(x)}{x} + ((0 - sin(x)) \cdot ln(x))))) \cdot cos(ln(x^{cos(x)}))) \cdot ln((1 - (5 \cdot x^{3})))) - ((\frac{1}{(1 - (5 \cdot x^{3}))} \cdot (0 - (5 \cdot (x^{3} \cdot \frac{3}{x})))) \cdot sin(ln(x^{cos(x)}))))}{(ln((1 - (5 \cdot x^{3}))) \cdot ln((1 - (5 \cdot x^{3}))))}$
 \end{document}

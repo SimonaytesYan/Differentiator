@@ -208,6 +208,39 @@ void PrintfInLatexReal(const char* function, const char *format, ...)
     fflush(LatexFp);
 }
 
+static int  GetOpRank(Node* node)
+{
+    switch (TYPE(node))
+    {
+        case TYPE_OP:
+            switch (VAL_OP(node))
+            {
+                case OP_POW:
+                case OP_SIN:
+                case OP_LN:
+                case OP_COS:
+                    return 2;
+                
+                case OP_DIV:
+                case OP_MUL:
+                    return 1;
+                
+                case OP_PLUS:
+                case OP_SUB:
+                    return 0;  
+                
+                default:
+                    return -1;
+            }
+        case TYPE_NUM:
+        case TYPE_VAR:
+            return 0;
+        default:
+            return -1;
+    }
+    
+}
+
 static void PrintRandBundles(FILE* stream)
 {
     fprintf(stream, "%s", BUNDLES[rand() % BUNDLES_NUMBER]);
@@ -560,6 +593,38 @@ static void PrintfInLatexEndDoc()
                   "\\end{document}");
 }
 
+int OpenLatexFile(const char file_name[])
+{
+    LatexFp = fopen(file_name, "w");
+    CHECK(LatexFp == nullptr, "Error during open file", -1);
+    
+    PrintInLatexStartDoc();
+
+    return 0;
+}
+
+void CloseLatexFile()
+{
+    PrintfInLatexEndDoc();
+
+    fclose(LatexFp);
+    LatexFp = nullptr;
+}
+
+static void PreFuncTexNode(Node* node, void* dfs_fp)
+{
+    FILE* stream = (FILE*)dfs_fp;
+                            
+    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
+        fprintf(stream, "\\frac{");
+    else if (!IS_NUM(node) && !IS_VAR(node))
+    {
+        if (VAL_OP(node) != OP_SIN && VAL_OP(node) != OP_COS && 
+            VAL_OP(node) != OP_LN && VAL_OP(node) != OP_POW)
+            fprintf(stream, "(");
+    }
+}
+
 static void PrintElemInLatex(Node* node, void* dfs_fp)
 {
     FILE* stream = (FILE*)dfs_fp;
@@ -617,38 +682,6 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
     default:
         fprintf(stream, "\t");
         break;
-    }
-}
-
-int OpenLatexFile(const char file_name[])
-{
-    LatexFp = fopen(file_name, "w");
-    CHECK(LatexFp == nullptr, "Error during open file", -1);
-    
-    PrintInLatexStartDoc();
-
-    return 0;
-}
-
-void CloseLatexFile()
-{
-    PrintfInLatexEndDoc();
-
-    fclose(LatexFp);
-    LatexFp = nullptr;
-}
-
-static void PreFuncTexNode(Node* node, void* dfs_fp)
-{
-    FILE* stream = (FILE*)dfs_fp;
-                            
-    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
-        fprintf(stream, "\\frac{");
-    else if (!IS_NUM(node) && !IS_VAR(node))
-    {
-        if (VAL_OP(node) != OP_SIN && VAL_OP(node) != OP_COS && 
-            VAL_OP(node) != OP_LN && VAL_OP(node) != OP_POW)
-            fprintf(stream, "(");
     }
 }
 
@@ -890,7 +923,7 @@ void SimplifyTree(Tree* tree)
 {
     assert(tree);
 
-    PrintfInLatex("\n\nУпростим получившееся выражение\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LARGE Упростим получившееся выражение}\n\n");
     
     Node* old_tree = nullptr;
     do

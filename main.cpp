@@ -20,11 +20,10 @@ int main()
     GraphicDump(&tree);
     printf("Tree dumped\n");
 
-    
     PrintfInLatex("$y = $");
 
     TexNode(tree.root);
-    PrintfInLatex("\n\n Продиффиринцируем эту функцию\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\Huge Продиффиринцируем эту функцию}\n\n");
 
     Tree DTree = {};
     TreeCtor(&DTree);
@@ -33,7 +32,7 @@ int main()
     
     SimplifyTree(&DTree);
     
-    PrintfInLatex("\n\n Получаем выражение\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\Huge Получаем выражение}\n\n");
 
     TexNode(DTree.root);
 
