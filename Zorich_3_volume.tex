@@ -13,100 +13,24 @@
 \parskip=8pt
 \pagestyle{empty}
 \begin{document}
-$y = $$\frac{sin(ln(x^{cos(x)}))}{ln((1 - (5 \cdot x^{3})))}$\newpage \textbf{\Huge Продиффиринцируем эту функцию}
+$y = $$(x \cdot x)$\newpage \textbf{\Huge Продиффиринцируем эту функцию}
 
-Имеем
-
-\begin{center}
-($x$)`
- = $1$\end{center}
-И хотя клуб любителей таких формул двумя блоками ниже, мы продолжаем
-
-\begin{center}
-($x$)`
- = $1$\end{center}
-\\ title{не сложно заметить} 
-
-\begin{center}
-($cos(x)$)`
- = $(1 \cdot (0 - sin(x)))$\end{center}
-Поэтому
-
-\begin{center}
-($x^{cos(x)}$)`
- = $(x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x))))$\end{center}
-Отметим, что
-
-\begin{center}
-($ln(x^{cos(x)})$)`
- = $(\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x)))))$\end{center}
-Откуда
-
-\begin{center}
-($sin(ln(x^{cos(x)}))$)`
- = $((\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x))))) \cdot cos(ln(x^{cos(x)})))$\end{center}
-По теореме Эскобара
-
-\begin{center}
-($1$)`
- = $0$\end{center}
-По теореме Эскобара
-
-\begin{center}
-($5$)`
- = $0$\end{center}
 Телец в козероге, поэтому
 
 \begin{center}
 ($x$)`
  = $1$\end{center}
-[Данные удалены]
-
-\begin{center}
-($3$)`
- = $0$\end{center}
-Если посмотреть на выражение под другим углом, можно получить
-
-\begin{center}
-($x^{3}$)`
- = $(x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x))))$\end{center}
-Вы не шокированы?
-
-\begin{center}
-($(5 \cdot x^{3})$)`
- = $((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x))))))$\end{center}
 Оказывается
 
 \begin{center}
-($(1 - (5 \cdot x^{3}))$)`
- = $(0 - ((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x)))))))$\end{center}
-Если вы не понимаете этот переход, то я вам сочувствую
+($x$)`
+ = $1$\end{center}
+Без комментариев
 
 \begin{center}
-($ln((1 - (5 \cdot x^{3})))$)`
- = $(\frac{1}{(1 - (5 \cdot x^{3}))} \cdot (0 - ((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x))))))))$\end{center}
-Поэтому
-
-\begin{center}
-($\frac{sin(ln(x^{cos(x)}))}{ln((1 - (5 \cdot x^{3})))}$)`
- = $\frac{((((\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot ((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot ln(x))))) \cdot cos(ln(x^{cos(x)}))) \cdot ln((1 - (5 \cdot x^{3})))) - ((\frac{1}{(1 - (5 \cdot x^{3}))} \cdot (0 - ((0 \cdot x^{3}) + (5 \cdot (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot ln(x)))))))) \cdot sin(ln(x^{cos(x)}))))}{(ln((1 - (5 \cdot x^{3}))) \cdot ln((1 - (5 \cdot x^{3}))))}$\end{center}
+($(x \cdot x)$)`
+ = $((1 \cdot x) + (x \cdot 1))$\end{center}
 \newpage \textbf{\LARGE Упростим получившееся выражение}
 
 \begin{center}
-$(\frac{cos(x)}{x} \cdot 1)$=$\frac{cos(x)}{x}$\end{center}
-\begin{center}
-$(1 \cdot (0 - sin(x)))$=$(0 - sin(x))$\end{center}
-\begin{center}
-$(0 \cdot x^{3})$=$0$\end{center}
-\begin{center}
-$(\frac{3}{x} \cdot 1)$=$\frac{3}{x}$\end{center}
-\begin{center}
-$(0 \cdot ln(x))$=$0$\end{center}
-\begin{center}
-$(\frac{3}{x} + 0)$=$\frac{3}{x}$\end{center}
-\begin{center}
-$(0 + (5 \cdot (x^{3} \cdot \frac{3}{x})))$=$(5 \cdot (x^{3} \cdot \frac{3}{x}))$\end{center}
-\newpage \textbf{\Huge Получаем выражение}
-
-$\frac{((((\frac{1}{x^{cos(x)}} \cdot (x^{cos(x)} \cdot (\frac{cos(x)}{x} + ((0 - sin(x)) \cdot ln(x))))) \cdot cos(ln(x^{cos(x)}))) \cdot ln((1 - (5 \cdot x^{3})))) - ((\frac{1}{(1 - (5 \cdot x^{3}))} \cdot (0 - (5 \cdot (x^{3} \cdot \frac{3}{x})))) \cdot sin(ln(x^{cos(x)}))))}{(ln((1 - (5 \cdot x^{3}))) \cdot ln((1 - (5 \cdot x^{3}))))}$
-\end{document}
+$(1 \cdot x)$=$

@@ -12,14 +12,17 @@
 #include "../Logging/Logging.h"
 #include "../Errors.h"
 
+#define DEBUG
+
 static const char   COMAND_PROTOTYPE[] = "dot GraphicDumps/dump%d -o GraphicDumps/Dump%d.png -T png";
 static       int    GRAPHIC_DUMP_CNT   = 0;
 
 typedef struct Node 
 {
     Node_t val   = {};
-    Node*  left  = nullptr;
-    Node*  right = nullptr;
+
+    Node*  left   = nullptr;
+    Node*  right  = nullptr;
 } Node;
 
 typedef void(*DFS_f)(Node* node, void*);
@@ -295,6 +298,10 @@ static int TreeConstructor(Tree* tree, int line, const char* name, const char* f
     tree->root->left     = tree->root;
     tree->root->right    = tree->root;
 
+    #ifdef DEBUG
+        printf("Ctor(tree.root) = %p\n", tree->root);
+    #endif
+
     tree->debug.name     = name;
     tree->debug.function = function;
     tree->debug.file     = file;
@@ -304,10 +311,20 @@ static int TreeConstructor(Tree* tree, int line, const char* name, const char* f
     return TreeCheck(tree);
 }
 
+static void NodeDtor(Node* node)
+{
+    if (node == nullptr)
+        return;
+    
+    if (node->val.type == TYPE_VAR)
+        free(node->val.val.var);
+    free(node);
+}
+
 static void DeleteNode(Node* node)
 {
     DFSNodeDtor(node);
-    free(node);
+    NodeDtor(node);
 }
 
 static void DFSNodeDtor(Node* node)
@@ -318,8 +335,8 @@ static void DFSNodeDtor(Node* node)
     DFSNodeDtor(node->left);
     DFSNodeDtor(node->right);
 
-    free(node->left);
-    free(node->right);
+    NodeDtor(node->left);
+    NodeDtor(node->right);
     node->left  = nullptr;
     node->right = nullptr;
 }
@@ -328,6 +345,10 @@ static int TreeDtor(Tree* tree)
 {
     TreeCheck(tree);
     
+    #ifdef DEBUG
+        printf("Dtor(tree.root) = %p\n", tree->root);
+    #endif
+
     DeleteNode(tree->root);
     tree->root = nullptr;
 

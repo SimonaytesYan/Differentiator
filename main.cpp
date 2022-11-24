@@ -27,7 +27,8 @@ int main()
 
     Tree DTree = {};
     TreeCtor(&DTree);
-    
+
+    free(DTree.root);
     DTree.root = Diff(tree.root);
     
     SimplifyTree(&DTree);

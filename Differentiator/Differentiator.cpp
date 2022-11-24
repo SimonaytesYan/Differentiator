@@ -71,7 +71,7 @@ static int  GetOpRank(OPER_TYPES operation);
                                             \
     PrintfInLatex( " = ");                  \
     TexNode(new_node);                      \
-    PrintfInLatex("\\end{center}\n"); \
+    PrintfInLatex("\\end{center}\n");       \
     return new_node;
 
 #define BinaryConstConv(oper)           \
@@ -79,12 +79,9 @@ static int  GetOpRank(OPER_TYPES operation);
     double a = VAL_N(L(node));          \
     double b = VAL_N(R(node));          \
                                         \
-    DeleteNode(L(node));                \
-    DeleteNode(R(node));                \
-    L(node) = nullptr;                  \
-    R(node) = nullptr;                  \
+    DelLR(node);                        \
                                         \
-    TYPE(node)   = TYPE_NUM;            \
+    TYPE(node)  = TYPE_NUM;             \
     VAL_N(node) = a oper b;             \
 }
 
@@ -92,8 +89,7 @@ static int  GetOpRank(OPER_TYPES operation);
 {                                       \
     double a = VAL_N(R(node));          \
                                         \
-    DeleteNode(R(node));                \
-    R(node) = nullptr;                  \
+    DelLR(node);                        \
                                         \
     TYPE(node)  = TYPE_NUM;             \
     VAL_N(node) = func(a);              \
@@ -101,7 +97,7 @@ static int  GetOpRank(OPER_TYPES operation);
 
 #define CpyAndReplace(from_cpy, for_replace)    \
 {                                               \
-    PrintfInLatex("\\begin{center}\n");         \
+    PrintfInLatex("\\begin{center}\n")          \
     TexNode(node);                              \
     Node* node_for_replace = Cpy(from_cpy);     \
                                                 \
@@ -109,10 +105,17 @@ static int  GetOpRank(OPER_TYPES operation);
     *for_replace = *node_for_replace;           \
     free(node_for_replace);                     \
                                                 \
-    PrintfInLatex("=");                         \
+    PrintfInLatex("=")                          \
     TexNode(for_replace);                       \
-    PrintfInLatex("\\end{center}\n");           \
+    PrintfInLatex("\\end{center}\n")            \
 }
+
+#define DelLR(node)                             \
+    DeleteNode(L(node));                        \
+    DeleteNode(R(node));                        \
+    L(node) = nullptr;                          \
+    R(node) = nullptr;
+
 
 #define L(node) node->left
 
@@ -881,6 +884,7 @@ void GetNodeFromFile(Node** node, FILE* fp)
             printf("End right\n");
         #endif
 
+        NodeDtor(*node);
         *node = new_node;
     }
     else
@@ -928,11 +932,15 @@ void SimplifyTree(Tree* tree)
     Node* old_tree = nullptr;
     do
     {
+        DeleteNode(old_tree);
         old_tree = Cpy(tree->root);
+
         ConstsConvolution(tree->root);
         RemoveNeutralElem(tree->root);
     }
     while(NodeCmp(old_tree, tree->root));
+
+    DeleteNode(old_tree);
 }
 
 void ConstsConvolution(Node* node)
@@ -948,6 +956,10 @@ void ConstsConvolution(Node* node)
 
     if ((L(node) != nullptr && !IS_NUM(L(node))) || !IS_NUM(R(node)))
         return;
+
+    #ifdef DEBUG
+        printf("Start ConstsConvolution: %p\n", node);
+    #endif
     
     PrintRandBundles(LatexFp);
 
@@ -983,11 +995,7 @@ void ConstsConvolution(Node* node)
         double a = VAL_N(L(node));
         double b = VAL_N(R(node));
 
-        DeleteNode(L(node));
-        DeleteNode(R(node));
-
-        L(node) = nullptr;
-        R(node) = nullptr;
+        DelLR(node);
 
         TYPE(node)  = TYPE_NUM;
         VAL_N(node) = pow(a, b);
