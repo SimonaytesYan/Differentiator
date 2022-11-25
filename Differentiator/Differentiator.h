@@ -41,9 +41,12 @@ void PrintElemInLog(Node_t elem);
 
 const int   MAX_STR_LEN         = 20;
 
+const int   MAX_DIS_NUM         = 100;
+
 const char  DEFAULT_TREE_NAME[] = "Tree";
 
 const char  DEFAULT_TEX_NAME[]  = "Zorich_3_volume.tex";
+
 
 int   SaveTreeInFile(Tree* tree, const char file_name[]);
 
@@ -70,6 +73,8 @@ void  SimplifyTree(Tree* tree);
 void  ConstsConvolution(Node* node);
 
 void PrintfInLatexReal(const char* function, const char *format, ...);
+
+void PrintRandBundleInLatex();
 
 int GetG(const char* str);
 

@@ -20,22 +20,34 @@ int main()
     GraphicDump(&tree);
     printf("Tree dumped\n");
 
-    PrintfInLatex("$y = $");
-
+    PrintfInLatex("\\textbf{\\LARGE Глава I. Функция}\n\n");
+    PrintfInLatex("\\begin{center}\n""$y = $");
     TexNode(tree.root);
-    PrintfInLatex("\\newpage \\textbf{\\Huge Продиффиринцируем эту функцию}\n\n");
+    PrintfInLatex("\\end{center}\n");
 
+    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава II. Зрительный анализ функции}\n\n");
+    PrintRandBundleInLatex();
+    PrintfInLatex("\\begin{center}\n""$y = $");
+    TexNode(tree.root);
+    PrintfInLatex("\\end{center}\n");
+
+    PrintfInLatex("\\newpage \\textbf{\\LAGRE Глава III. Дифференцирование}\n\n");
+    
     Tree DTree = {};
     TreeCtor(&DTree);
 
     free(DTree.root);
     DTree.root = Diff(tree.root);
     
+    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава IV.Упрощение выражения}\n\n");
+
     SimplifyTree(&DTree);
     
-    PrintfInLatex("\\newpage \\textbf{\\Huge Получаем выражение}\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава V. Результат}\n\n");
 
     TexNode(DTree.root);
+    
+    //PrintfInLatex("\\newpage \\textbf{\\LARGE Список литературы}\n\n");
 
     printf("Close latex\n");
 

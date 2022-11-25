@@ -8,9 +8,7 @@
 
 //#define DEBUG
 
-//--------------------CONST AND STATIC VARIABLES--------------------
-
-static FILE* LatexFp = nullptr;
+FILE* LatexFp = nullptr;
 
 //--------------------FUNCTION PROTOTIPES--------------------
 
@@ -44,8 +42,6 @@ static void  PostFuncTexNode(Node* node, void* dfs_fp);
 
 static void  PreFuncTexNode(Node* node, void* dfs_fp);
 
-static void  PrintRandBundles(FILE* stream);
-
 static void  RemoveNeutralElem(Node* node);
 
 static void  RemoveNeutralPlus(Node* node);
@@ -63,7 +59,7 @@ static int  GetOpRank(OPER_TYPES operation);
 //--------------------DSL--------------------
 
 #define ReturnAndTex                        \
-    PrintRandBundles(LatexFp);              \
+    PrintRandBundleInLatex();               \
                                             \
     PrintfInLatex("\\begin{center}\n""(");  \
     TexNode(node);                          \
@@ -97,7 +93,7 @@ static int  GetOpRank(OPER_TYPES operation);
 
 #define CpyAndReplace(from_cpy, replace_it)     \
 {                                               \
-    PrintRandBundles(LatexFp);                  \
+    PrintRandBundleInLatex();                   \
     PrintfInLatex("\\begin{center}\n")          \
     TexNode(node);                              \
     Node* replacement = CpyNode(from_cpy);      \
@@ -245,9 +241,9 @@ static int  GetOpRank(Node* node)
     
 }
 
-static void PrintRandBundles(FILE* stream)
+void PrintRandBundleInLatex()
 {
-    fprintf(stream, "%s", BUNDLES[rand() % BUNDLES_NUMBER]);
+    PrintfInLatex("%s", BUNDLES[rand() % BUNDLES_NUMBER]);
 }
 
 static Node* NodeCtorNum(double val)
@@ -593,6 +589,11 @@ static void PrintInLatexStartDoc()
                   "\\parskip=8pt\n"
                   "\\pagestyle{empty}\n"
                   "\\begin{document}\n"
+                  "\\begin{center}\n"
+                  "\\textbf{\\LARGE Исследовательская работа по теме:\n\n"
+                  "Исследование функции дифференциальными методами}"
+                  "\\end{center}"
+                  "\\newpage"
                  );
 }
 
@@ -714,6 +715,8 @@ int TexNode(Node* root)
     #ifdef DEBUG
         printf("Start tex\n");    
     #endif
+
+    //Node* Designations[MAX_DIS_NUM] = {};
 
     PrintfInLatex("$");
 
@@ -849,7 +852,7 @@ void GetNodeFromFile(Node** node, FILE* fp)
             printf("new node\n");
         #endif
 
-        Node* new_node = (Node*)calloc(sizeof(Node), 1);
+        Node* new_node = (Node*)calloc(1, sizeof(Node));
 
         assert(new_node);
 
@@ -881,9 +884,10 @@ void GetNodeFromFile(Node** node, FILE* fp)
         if (IS_OP(new_node) && 
            (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS || VAL_OP(new_node) == OP_LN))
         {
-            DFSNodeDtor(L(new_node));
-            L(new_node) = nullptr;
+            DeleteNode(L(new_node));
+            new_node->left = nullptr;
         }
+            
         #ifdef DEBUG
             printf("\nGo to right\n");
         #endif
@@ -935,8 +939,6 @@ void SimplifyTree(Tree* tree)
 {
     assert(tree);
 
-    PrintfInLatex("\\newpage \\textbf{\\LARGE Упростим получившееся выражение}\n\n");
-    
     Node* old_tree = nullptr;
     do
     {
@@ -969,7 +971,7 @@ void ConstsConvolution(Node* node)
         printf("Start ConstsConvolution: %p\n", node);
     #endif
     
-    PrintRandBundles(LatexFp);
+    PrintRandBundleInLatex();
 
     PrintfInLatex("\\begin{center}\n");
     TexNode(node);

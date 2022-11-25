@@ -12,8 +12,6 @@
 #include "../Logging/Logging.h"
 #include "../Errors.h"
 
-#define DEBUG
-
 static const char   COMAND_PROTOTYPE[] = "dot GraphicDumps/dump%d -o GraphicDumps/Dump%d.png -T png";
 static       int    GRAPHIC_DUMP_CNT   = 0;
 
@@ -116,6 +114,7 @@ static int NodeCtor(Node* node, Node_t val)
 
 static void WriteNodeAndEdge(Node* node, void* fp_void)
 { 
+    assert(node);
     FILE* fp = (FILE*)fp_void;
 
     #pragma GCC diagnostic push
@@ -125,13 +124,46 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
     switch (node->val.type)
     {
     case TYPE_NUM:
-        fprintf(fp, "NUM");
+        fprintf(fp, "NUM | %lf", node->val.val.dbl);
         break;
     case TYPE_OP:
-        fprintf(fp, "OPER");
+        fprintf(fp, "OPER | ");
+        switch(node->val.val.op)
+        {
+            case OP_COS:
+                fprintf(fp, "cos");
+                break;
+            case OP_SIN:
+                fprintf(fp, "sin");
+                break;
+            case OP_PLUS:
+                fprintf(fp, "+");
+                break;
+            case OP_SUB:
+                fprintf(fp, "-");
+                break;
+            case OP_MUL:
+                fprintf(fp, "*");
+                break;
+            case OP_DIV:
+                fprintf(fp, "/");
+                break;
+            case OP_LN:
+                fprintf(fp, "ln");
+                break;
+            case OP_POW:
+                fprintf(fp, "^");
+                break;
+            case UNDEF_OPER_TYPE:
+                fprintf(fp, "?");
+                break;
+            default:
+                fprintf(fp, "#");
+                break;
+        }
         break;
     case TYPE_VAR:
-        fprintf(fp, "VAR");
+        fprintf(fp, "VAR | %s ", node->val.val.var);
         break;
     case UNDEF_NODE_TYPE:
         fprintf(fp, "UNDEF");
@@ -140,44 +172,9 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
         fprintf(fp, "unknown");
         break;
     }
-    fprintf(fp, " | %s \\n | ", node->val.val.var);
 
-    switch(node->val.val.op)
-    {
-        case OP_COS:
-            fprintf(fp, "cos");
-            break;
-        case OP_SIN:
-            fprintf(fp, "sin");
-            break;
-        case OP_PLUS:
-            fprintf(fp, "+");
-            break;
-        case OP_SUB:
-            fprintf(fp, "-");
-            break;
-        case OP_MUL:
-            fprintf(fp, "*");
-            break;
-        case OP_DIV:
-            fprintf(fp, "/");
-            break;
-        case OP_LN:
-            fprintf(fp, "ln");
-            break;
-        case OP_POW:
-            fprintf(fp, "^");
-            break;
-        case UNDEF_OPER_TYPE:
-            fprintf(fp, "?");
-            break;
-        default:
-            fprintf(fp, "#");
-            break;
-    }
-
-    fprintf(fp, " |%lf } | { <l> %06X  |<r>  %06X}}\"]\n",
-                 node->val.val.dbl, node->left, node->right);
+    fprintf(fp, "} | { <l> %06X  |<r>  %06X}}\"]\n",
+                 node->left, node->right);
     
     if (node->left != nullptr)
         fprintf(fp, "Node%06X -> Node%06X[xlabel = \"L\"]\n", node, node->left);
