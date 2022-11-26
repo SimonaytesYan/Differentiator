@@ -63,6 +63,13 @@ static void  PrintElemInLatex(Node* node, void* dfs_fp);
 
 static void  TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height);
 
+static int AnalisNodeForDesignation(Node* node, Node** Designations, int height);
+
+static void PrintAllDesignations(Node** Designations);
+
+static void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_decoration[],
+                                                             const char in_decoration[]);
+
 //--------------------FUNCTION IMPLEMENTATION--------------------
 
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
@@ -501,7 +508,30 @@ void DtorDesignations(Node** Designations)
     }
 }
 
-void PrintAllDesignations(Node** Designations)
+void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_decoration[],
+                                                             const char in_decoration[])
+{
+    assert(node_a);
+    assert(node_b);
+
+    Node* Designations[MAX_DIS_NUM] = {};
+    AnalisNodeForDesignation(node_a, Designations, 0);
+    AnalisNodeForDesignation(node_b, Designations, 0);
+
+    PrintAllDesignations(Designations);
+
+    PrintfInLatex(pre_decoration);
+    PrintfInLatex("$");
+    TexNodeWithDesignationsDFS(node_a, Designations, 0);
+
+    PrintfInLatex(in_decoration);
+    PrintfInLatex(" = ");
+
+    TexNodeWithDesignationsDFS(node_b, Designations, 0);
+    PrintfInLatex("$");
+}
+
+static void PrintAllDesignations(Node** Designations)
 {
     assert(Designations);
 
@@ -525,7 +555,7 @@ void PrintAllDesignations(Node** Designations)
 //!@return          number of elements in subtree of given node
 //!-------------------------------
 
-int AnalisNodeForDesignation(Node* node, Node** Designations, int height)
+static int AnalisNodeForDesignation(Node* node, Node** Designations, int height)
 {
     if (node == nullptr)
         return 0;
@@ -553,15 +583,19 @@ static int GetLetterFromIndes(int index)
     return letter;
 }
 
-void TexNodeWithDesignations(Node* root)
+void TexNodeWithDesignations(Node* root, const char pre_decoration[])
 {
     assert(root);
     Node* Designations[MAX_DIS_NUM] = {0};
 
-    printf("Start tex node with Designations\n");
+    #ifdef DEBUG
+        printf("Start tex node with Designations\n");
+    #endif
 
     AnalisNodeForDesignation(root, Designations, 0);
     PrintAllDesignations(Designations);
+
+    PrintfInLatex(pre_decoration);
 
     PrintfInLatex("$");
     TexNodeWithDesignationsDFS(root, Designations, 0);
@@ -948,8 +982,7 @@ void ConstsConvolution(Node* node)
     PrintRandBundleInLatex();
 
     PrintfInLatex("\\begin{center}\n");
-    TexNode(node);
-    PrintfInLatex(" = ");
+    Node* old_node = CpyNode(node);
 
     switch (VAL_OP(node))
     {
@@ -994,8 +1027,10 @@ void ConstsConvolution(Node* node)
         break;
     }
     
-    TexNode(node);
+    TexEqualityWithDesignations(old_node, node, "\\begin{center}", "");
     PrintfInLatex("\\end{center}\n");
+
+    DeleteNode(old_node);
 }
 
 static void RemoveNeutralPlus(Node* node)

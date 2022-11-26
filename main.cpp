@@ -18,14 +18,12 @@ int main()
     printf("Tree got\n");
 
     PrintfInLatex("\\textbf{\\LARGE Глава I. Функция}\n\n");
-    PrintfInLatex("\\begin{center}\n""$y = $");
-    TexNodeWithDesignations(tree.root);
+    TexNodeWithDesignations(tree.root, "\\begin{center}\n""$y = $");
     PrintfInLatex("\\end{center}\n");
 
     PrintfInLatex("\\newpage \\textbf{\\LARGE Глава II. Зрительный анализ функции}\n\n");
     PrintRandBundleInLatex();
-    PrintfInLatex("\\begin{center}\n""$y = $");
-    TexNodeWithDesignations(tree.root);
+    TexNodeWithDesignations(tree.root, "\\begin{center}\n""$y = $");
     PrintfInLatex("\\end{center}\n");
 
     PrintfInLatex("\\newpage \\textbf{\\LAGRE Глава III. Дифференцирование}\n\n");
@@ -42,9 +40,7 @@ int main()
     
     PrintfInLatex("\\newpage \\textbf{\\LARGE Глава V. Результат}\n\n");
 
-    PrintfInLatex("$y = $");
-    TexNode(DTree.root);
-    TexNodeWithDesignations(DTree.root);
+    TexNodeWithDesignations(DTree.root, "$y = $");
     //PrintfInLatex("\\newpage \\textbf{\\LARGE Список литературы}\n\n");
 
     printf("Close latex\n");

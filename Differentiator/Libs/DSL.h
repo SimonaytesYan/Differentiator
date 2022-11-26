@@ -1,16 +1,13 @@
 #ifndef __SYM_DIFF_DSL__
 #define __SYM_DIFF_DSL__
 
-#define ReturnAndTex                        \
-    PrintRandBundleInLatex();               \
-                                            \
-    PrintfInLatex("\\begin{center}\n""(");  \
-    TexNode(node);                          \
-    PrintfInLatex(")`\n");                  \
-                                            \
-    PrintfInLatex( " = ");                  \
-    TexNode(new_node);                      \
-    PrintfInLatex("\\end{center}\n");       \
+#define ReturnAndTex                            \
+    PrintRandBundleInLatex();                   \
+                                                \
+    TexEqualityWithDesignations(node, new_node, \
+             "\\begin{center}\n (", ")`\n = "); \
+                                                \
+    PrintfInLatex("\\end{center}\n");           \
     return new_node;
 
 #define BinaryConstConv(oper)           \
@@ -34,20 +31,18 @@
     VAL_N(node) = func(a);              \
 }
 
-#define CpyAndReplace(from_cpy, replace_it)     \
-{                                               \
-    PrintRandBundleInLatex();                   \
-    PrintfInLatex("\\begin{center}\n")          \
-    TexNode(node);                              \
-    Node* replacement = CpyNode(from_cpy);      \
-                                                \
-    DelLR(replace_it);                          \
-    *replace_it = *replacement;                 \
-    free(replacement);                          \
-                                                \
-    PrintfInLatex("=")                          \
-    TexNode(replace_it);                        \
-    PrintfInLatex("\\end{center}\n")            \
+#define CpyAndReplace(from_cpy, replace_it)                 \
+{                                                           \
+    PrintRandBundleInLatex();                               \
+    TexEqualityWithDesignations(replace_it, from_cpy,       \
+                                "\\begin{center}\n", "");   \
+    PrintfInLatex("\\end{center}\n")                        \
+                                                            \
+    Node* replacement = CpyNode(from_cpy);                  \
+                                                            \
+    DelLR(replace_it);                                      \
+    *replace_it = *replacement;                             \
+    free(replacement);                                      \
 }
 
 #define DelLR(node)                             \
