@@ -18,7 +18,7 @@ enum OPER_TYPES
     OP_DIV          = 3,
     OP_SIN          = 4,
     OP_COS          = 5,
-    OP_LN           = 6,
+    OP_LOG          = 6,
     OP_POW          = 7,
 };
 

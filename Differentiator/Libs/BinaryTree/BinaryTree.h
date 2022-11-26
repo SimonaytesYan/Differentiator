@@ -151,11 +151,11 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
             case OP_DIV:
                 fprintf(fp, "/");
                 break;
-            case OP_LN:
-                fprintf(fp, "ln");
+            case OP_LOG:
+                fprintf(fp, "log");
                 break;
             case OP_POW:
-                fprintf(fp, "^");
+                fprintf(fp, "**");
                 break;
             case UNDEF_OPER_TYPE:
                 fprintf(fp, "?");

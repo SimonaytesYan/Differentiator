@@ -100,7 +100,7 @@ static int  GetOpRank(Node* node)
             {
                 case OP_POW:
                 case OP_SIN:
-                case OP_LN:
+                case OP_LOG:
                 case OP_COS:
                     return 2;
                 
@@ -257,7 +257,7 @@ static Node* DiffSub(Node* node)
     ReturnAndTex;
 }
 
-static Node* DiffLn(Node* node)
+static Node* DiffLog(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_MUL);
 
@@ -287,7 +287,7 @@ static Node* DiffPow(Node* node)
     LR(RL(new_node)) = CpyNode(L(node));
 
     L(RR(new_node))  = Diff(R(node));
-    R(RR(new_node))  = NodeCtorOp(OP_LN);
+    R(RR(new_node))  = NodeCtorOp(OP_LOG);
     RR(RR(new_node)) = CpyNode(L(node));
 
     ReturnAndTex;
@@ -325,8 +325,8 @@ Node* Diff(Node* node)
                 return DiffSin(node);
             case OP_COS:
                 return DiffCos(node);
-            case OP_LN:
-                return DiffLn(node);
+            case OP_LOG:
+                return DiffLog(node);
             case OP_POW:
                 return DiffPow(node);
 
@@ -350,12 +350,10 @@ Node* Diff(Node* node)
     return nullptr;
 }
 
-int SaveTreeInFile(Tree* tree, const char file_name[])
+int SaveTreeInFile(Tree* tree, FILE* fp)
 {
     ReturnIfError(TreeCheck(tree));
-
-    FILE* fp = fopen(file_name, "w");
-    CHECK(fp == nullptr, "Error during open file", -1);
+    CHECK(fp == nullptr, "fp = nullptr", -1);
 
     DFS_f pre_function = [](Node*, void* dfs_fp)
                        {
@@ -376,7 +374,7 @@ int SaveTreeInFile(Tree* tree, const char file_name[])
                     in_function,   fp,
                     post_function, fp);
 
-    fclose(fp);
+    fflush(fp);
 
     return 0;
 }
@@ -389,6 +387,7 @@ static void PrintElem(FILE* stream, Node* elem)
         fprintf(stream, "%s", VAL_VAR(elem));
         break;
     case TYPE_OP:
+    {
         switch(VAL_OP(elem))
         {
             PUT_PLUS
@@ -397,7 +396,7 @@ static void PrintElem(FILE* stream, Node* elem)
             PUT_DIV
             PUT_SIN
             PUT_COS
-            PUT_LN
+            PUT_LOG
             PUT_POW
 
             case UNDEF_OPER_TYPE:
@@ -408,6 +407,7 @@ static void PrintElem(FILE* stream, Node* elem)
                 break;
         }
         break;
+    }
     case TYPE_NUM:
         fprintf(stream, "%lg", VAL_N(elem));
         break;
@@ -445,10 +445,12 @@ static void PrintInLatexStartDoc()
                   "\\parindent=0pt\n"
                   "\\parskip=8pt\n"
                   "\\pagestyle{empty}\n"
+                  "\\usepackage{graphicx}\n"
+
                   "\\begin{document}\n"
                   "\\begin{center}\n"
-                  "\\textbf{\\LARGE Исследовательская работа по теме:\n\n"
-                  "Исследование функции дифференциальными методами}"
+                  "\\textbf{\\LARGE{Исследовательская работа по теме:\\\\"
+                  "Исследование функции дифференциальными методами}}"
                   "\\end{center}"
                   "\\newpage"
                  );
@@ -643,7 +645,7 @@ static void PreFuncTexNode(Node* node, void* dfs_fp)
     else if (!IS_NUM(node) && !IS_VAR(node))
     {
         if (VAL_OP(node) != OP_SIN && VAL_OP(node) != OP_COS && 
-            VAL_OP(node) != OP_LN && VAL_OP(node) != OP_POW)
+            VAL_OP(node) != OP_LOG && VAL_OP(node) != OP_POW)
             fprintf(stream, "(");
     }
 }
@@ -673,8 +675,8 @@ static void PrintElemInLatex(Node* node, void* dfs_fp)
                 fprintf(stream, "cos(");
                 break;
 
-            case OP_LN:
-                fprintf(stream, "ln(");
+            case OP_LOG:
+                fprintf(stream, "log(");
                 break;
 
             case OP_POW:
@@ -796,13 +798,13 @@ static void GetNodeValFromStr(const char str[], Node_t* val)
         val->type   = TYPE_OP;
         val->val.op = OP_COS;
     }
-    else if (strcmp(str, "ln") == 0)
+    else if (strcmp(str, "log") == 0)
     {
 
         val->type   = TYPE_OP;
-        val->val.op = OP_LN; 
+        val->val.op = OP_LOG; 
     }
-    else if (strcmp(str, "^") == 0)
+    else if (strcmp(str, "**") == 0)
     {
         val->type   = TYPE_OP;
         val->val.op = OP_POW;
@@ -890,7 +892,7 @@ void GetNodeFromFile(Node** node, FILE* fp)
         GetNodeValFromStr(new_object, &(new_node)->val);
 
         if (IS_OP(new_node) && 
-           (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS || VAL_OP(new_node) == OP_LN))
+           (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS || VAL_OP(new_node) == OP_LOG))
         {
             DeleteNode(L(new_node));
             new_node->left = nullptr;
@@ -1004,7 +1006,7 @@ void ConstsConvolution(Node* node)
     case OP_COS:
         UnaryConstConv(cos);
         break;
-    case OP_LN:
+    case OP_LOG:
         UnaryConstConv(log);
         break;
     case OP_POW:
@@ -1127,4 +1129,35 @@ static void RemoveNeutralElem(Node* node)
         default:
             break;
     }
+}
+
+void ConstructGraphInTex(Tree* tree, const char color[], int left_x_border, int right_x_border)
+{
+    FILE* fp = fopen(PLOT_PATH, "w");
+    
+    fprintf(fp, "set terminal jpeg size 600,600\n"
+                "set output \"%s.jpg\"\n", PLOT_PATH);
+    fprintf(fp, "set grid x\n"
+                "set grid y\n"
+                "set xrange [%d:%d]\n", left_x_border, right_x_border);
+    fprintf(fp, "plot ");
+
+    SaveTreeInFile(tree, fp);
+
+    fprintf(fp, " lt rgb \"%s\" lw 2\n", color);
+
+    char comand[100] = "";
+    sprintf(comand, "gnuplot %s", PLOT_PATH);
+
+    #ifdef DEBUG
+        printf("comand = <%s>\n", comand);
+    #endif
+
+    fflush(fp);
+    
+    system(comand);
+
+    PrintfInLatex("\\includegraphics{%s.jpg}", PLOT_PATH);
+
+    fclose(fp);
 }

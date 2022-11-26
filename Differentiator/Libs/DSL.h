@@ -5,7 +5,7 @@
     PrintRandBundleInLatex();                   \
                                                 \
     TexEqualityWithDesignations(node, new_node, \
-             "\\begin{center}\n (", ")`\n = "); \
+             "\\begin{center}\n (", ")'\n "); \
                                                 \
     PrintfInLatex("\\end{center}\n");           \
     return new_node;
@@ -115,13 +115,13 @@
         fprintf(stream, " cos ");   \
         break;
 
-#define PUT_LN                      \
-    case OP_LN:                     \
-        fprintf(stream, " ln ");    \
+#define PUT_LOG                      \
+    case OP_LOG:                     \
+        fprintf(stream, " log ");    \
         break;
 
-#define PUT_POW                      \
-    case OP_POW:                     \
-        fprintf(stream, " ^ ");      \
+#define PUT_POW                     \
+    case OP_POW:                    \
+        fprintf(stream, " ** ");    \
         break;
 #endif

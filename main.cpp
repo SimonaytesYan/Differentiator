@@ -5,7 +5,7 @@
 int main()
 {
     srand(time(NULL));
-    printf("Starting main\n");
+    printf("Star main\n");
 
     OpenHtmlLogFile("Diff.log");
     OpenLatexFile(DEFAULT_TEX_NAME);
@@ -13,13 +13,15 @@ int main()
     Tree tree = {};
     TreeCtor(&tree);
 
-    printf("start getting tree\n");
     GetTreeFromFile(&tree, DEFAULT_TREE_NAME);
     printf("Tree got\n");
 
+    GraphicDump(&tree);
     PrintfInLatex("\\textbf{\\LARGE Глава I. Функция}\n\n");
     TexNodeWithDesignations(tree.root, "\\begin{center}\n""$y = $");
     PrintfInLatex("\\end{center}\n");
+
+    ConstructGraphInTex(&tree, "green", -10, 10);
 
     PrintfInLatex("\\newpage \\textbf{\\LARGE Глава II. Зрительный анализ функции}\n\n");
     PrintRandBundleInLatex();
@@ -38,10 +40,12 @@ int main()
 
     SimplifyTree(&DTree);
     
-    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава V. Результат}\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава V. Результат вычислений}\n\n");
 
-    TexNodeWithDesignations(DTree.root, "$y = $");
-    //PrintfInLatex("\\newpage \\textbf{\\LARGE Список литературы}\n\n");
+    
+    TexNodeWithDesignations(tree.root, "$y = $");
+    TexNodeWithDesignations(DTree.root, "$y' = $");
+    
 
     printf("Close latex\n");
 
