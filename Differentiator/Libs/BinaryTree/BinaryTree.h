@@ -11,6 +11,7 @@
 
 #include "../Logging/Logging.h"
 #include "../Errors.h"
+#include "../DSL.h"
 
 static const char   COMAND_PROTOTYPE[] = "dot GraphicDumps/dump%d -o GraphicDumps/Dump%d.png -T png";
 static       int    GRAPHIC_DUMP_CNT   = 0;
@@ -65,6 +66,8 @@ static void DeleteNode(Node* node);
 static void DFSNodeDtor(Node* node);
 
 static int NodeCmp(Node* node_a, Node* node_b);
+
+static Node* CpyNode(Node* node);
 
 int NodeCmp(Node* node_a, Node* node_b)
 {
@@ -292,8 +295,8 @@ static int TreeConstructor(Tree* tree, int line, const char* name, const char* f
     LogAndParseErr(tree == nullptr, NULL_TREE_POINTER);
 
     tree->root           = (Node*)calloc(1, sizeof(Node));
-    tree->root->left     = tree->root;
-    tree->root->right    = tree->root;
+    tree->root->left     = nullptr;
+    tree->root->right    = nullptr;
 
     #ifdef DEBUG
         printf("Ctor(tree.root) = %p\n", tree->root);
@@ -356,6 +359,33 @@ static int TreeDtor(Tree* tree)
 
     return 0;
 }
+
+static Node* CpyNode(Node* node)
+{
+    if (node == nullptr)
+        return nullptr;
+    
+    #ifdef DEBUG
+        PrintElem(stdout, node);
+        printf(" node = %p\nleft = %p\nright = %p\n", node, L(node), R(node));
+    #endif
+
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    new_node->val.type = node->val.type;
+    new_node->val.val  = node->val.val;
+    if (TYPE(new_node) == TYPE_VAR)
+    {
+        VAL_VAR(new_node) = (char*)calloc(1, strlen(VAL_VAR(node)) + 1);
+        strcpy(VAL_VAR(new_node), VAL_VAR(node));
+    }
+
+    L(new_node) = CpyNode(L(node));
+    R(new_node) = CpyNode(R(node));
+
+    return new_node;
+}
+
 
 static int TreeInsertLeafRight(Tree* tree, const Node_t value, Node* after_which)
 {

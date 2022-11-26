@@ -17,18 +17,15 @@ int main()
     GetTreeFromFile(&tree, DEFAULT_TREE_NAME);
     printf("Tree got\n");
 
-    GraphicDump(&tree);
-    printf("Tree dumped\n");
-
     PrintfInLatex("\\textbf{\\LARGE Глава I. Функция}\n\n");
     PrintfInLatex("\\begin{center}\n""$y = $");
-    TexNode(tree.root);
+    TexNodeWithDesignations(tree.root);
     PrintfInLatex("\\end{center}\n");
 
     PrintfInLatex("\\newpage \\textbf{\\LARGE Глава II. Зрительный анализ функции}\n\n");
     PrintRandBundleInLatex();
     PrintfInLatex("\\begin{center}\n""$y = $");
-    TexNode(tree.root);
+    TexNodeWithDesignations(tree.root);
     PrintfInLatex("\\end{center}\n");
 
     PrintfInLatex("\\newpage \\textbf{\\LAGRE Глава III. Дифференцирование}\n\n");
@@ -36,7 +33,7 @@ int main()
     Tree DTree = {};
     TreeCtor(&DTree);
 
-    free(DTree.root);
+    DeleteNode(DTree.root);
     DTree.root = Diff(tree.root);
     
     PrintfInLatex("\\newpage \\textbf{\\LARGE Глава IV.Упрощение выражения}\n\n");
@@ -45,8 +42,9 @@ int main()
     
     PrintfInLatex("\\newpage \\textbf{\\LARGE Глава V. Результат}\n\n");
 
+    PrintfInLatex("$y = $");
     TexNode(DTree.root);
-    
+    TexNodeWithDesignations(DTree.root);
     //PrintfInLatex("\\newpage \\textbf{\\LARGE Список литературы}\n\n");
 
     printf("Close latex\n");
