@@ -9,14 +9,14 @@
 //E   ::= T{['+','-']T}*
 //T   ::= P{['*','/']P}*
 //O   ::= {"sin" | "cos" | "log"}?POW
-//POW ::= P {"**"P}*
+//POW ::= P {"**"O}*
 //P   ::= '('E')' | V
 //V   ::= ['a'-'z'] | N
 //N   ::= ['0'-'9']+
 //----------------------------
 
 //----------------------------
-//+: 5; 2934; 14+99; 5*x; x; 2 + x*(3 + 4542/2) - y; sin(sin(x)); y + sin(a * cos(log(1))) 
+//+: x**2; x**x**x; y+sin(x**2); 5; 2934; 14+99; 5*x; x; 2 + x*(3 + 4542/2) - y; sin(sin(x)); y + sin(a * cos(log(1))) 
 //-: -5; +7; -19*7; x + u15; 17l; x + y - ; kl; A
 //----------------------------
 
@@ -45,7 +45,7 @@ Node* CreateNodeWithChild_Op(Node* left_node, Node* right_node, OPER_TYPES op)
     return new_node;
 }
 
-Node* GetG(const char* str)
+Node* GetNodeFromStr(const char* str)
 {
     #ifdef DEBUG
         printf("(G) s = <%s>\n", str);
@@ -153,15 +153,15 @@ Node* GetO(const char** s)
 Node* GetPow(const char** s)
 {
     #ifdef DEBUG
-        printf("(POW) s = <%s>", *s);
+        printf("(POW) s = <%s>\n", *s);
     #endif
     Node* node = GetP(s);
 
     while (!strncmp(*s, "**", 2))
     {
         (*s)+=2;
-        Node* node_right = GetP(s);
-        node = CreateNodeWithChild_Op(node, node_right, OP_POW);
+        Node* node_right = GetO(s);
+        node             = CreateNodeWithChild_Op(node, node_right, OP_POW);
     }
     
     return node;

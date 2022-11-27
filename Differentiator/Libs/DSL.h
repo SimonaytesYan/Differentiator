@@ -1,6 +1,8 @@
 #ifndef __SYM_DIFF_DSL__
 #define __SYM_DIFF_DSL__
 
+const double PRECISION = 1e-6;
+
 #define ReturnAndTex                            \
     PrintRandBundleInLatex();                   \
                                                 \
@@ -71,9 +73,9 @@
 
 #define IS_NUM(node) (node->val.type == TYPE_NUM)
 
-#define IS_ZERO(node) (IS_NUM(node) && VAL_N(node) == 0)
+#define IS_ZERO(node) (IS_NUM(node) && -PRECISION <= VAL_N(node) &&  VAL_N(node) <= PRECISION)
 
-#define IS_ONE(node) (IS_NUM(node) && VAL_N(node) == 1)
+#define IS_ONE(node) (IS_NUM(node) && 1 - PRECISION <= VAL_N(node) &&  VAL_N(node) <= 1 + PRECISION)
 
 
 #define VAL_N(node) node->val.val.dbl

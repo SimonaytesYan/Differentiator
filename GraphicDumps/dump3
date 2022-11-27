@@ -1,8 +1,0 @@
-digraph G{
-node[shape = record, fontsize = 14];
-splines = ortho
-info[label = "root = 0x000490"]
-Node000490[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000490 \n | { <v>OPER | sin} | { <l> 000000  |<r>  0004D0}}"]
-Node000490 -> Node0004D0[xlabel = "R"]
-Node0004D0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>0004D0 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
-}

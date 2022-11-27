@@ -13,8 +13,6 @@ const char  DEFAULT_TEX_NAME[]          = "Zorich_3_volume.tex";
 
 int   SaveTreeInFile(Tree* tree, FILE* fp);
 
-void  GetNodeFromFile(Node** new_node, FILE* fp);
-
 int   GetTreeFromFile(Tree* tree, const char file_name[]);
 
 void  OutputGraphicDump(Tree* tree);
@@ -28,8 +26,6 @@ void  TexNodeWithDesignations(Node* root, const char pre_decoration[]);
 void  CloseLatexFile();
 
 Node* Diff(Node* node);
-
-Node* CpyNode(Node* node);
 
 void  PrintfInLatex(const char *format, ...);
 

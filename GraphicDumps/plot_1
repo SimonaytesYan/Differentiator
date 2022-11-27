@@ -1,0 +1,6 @@
+set terminal jpeg size 600,600
+set output "GraphicDumps/plot_1.jpg"
+set grid x
+set grid y
+set xrange [-10.000000:10.000000]
+plot ((x) ** ( cos (x))) lt rgb "green" lw 2, (((x) ** ( cos (x))) * ((( cos (x)) / (x)) + (((0) - ( sin (x))) * ( log (x))))) lt rgb "red" lw 2

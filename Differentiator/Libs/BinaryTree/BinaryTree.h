@@ -54,7 +54,7 @@ static int   NodeCmp(Node* node_a, Node* node_b);
 
 static Node* CpyNode(Node* node);
 
-static int  TreeCheck(Tree* tree);
+static int   TreeCheck(Tree* tree);
 
 static int   TreeConstructor(Tree* tree, int capacity, int line, const char* name, const char* function, const char* file);
  

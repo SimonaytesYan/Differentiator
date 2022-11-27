@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include <stdarg.h>
 #include <math.h>
@@ -6,6 +7,7 @@
 #include "Differentiator.h"
 #include "Libs/Bundles.h"
 #include "Libs/DSL.h"
+#include "Libs/ResursiveDescent/RecursiveDescent.h"
 
 //#define DEBUG
 
@@ -702,178 +704,6 @@ void TexNode(Node* root)
     fflush(LatexFp);
 }
 
-static void GetNodeValFromStr(const char str[], Node_t* val)
-{
-    assert(val);
-
-    if (strcmp(str, "+") == 0)
-    {
-        #ifdef DEBUG
-            printf("plus\n");
-        #endif
-
-        val->type   = TYPE_OP;
-        val->val.op = OP_PLUS; 
-    }
-    else if (strcmp(str, "-") == 0)
-    {
-        #ifdef DEBUG
-            printf("minus\n");
-        #endif
-        val->type   = TYPE_OP;
-        val->val.op = OP_SUB;
-    }
-    else if (strcmp(str, "*") == 0)
-    {
-        #ifdef DEBUG
-            printf("mul\n");
-        #endif
-
-        val->type   = TYPE_OP;
-        val->val.op = OP_MUL;
-    }
-    else if (strcmp(str, "/") == 0)
-    {
-        #ifdef DEBUG
-            printf("div\n");
-        #endif
-
-        val->type   = TYPE_OP;
-        val->val.op = OP_DIV;
-    }
-    else if (strcmp(str, "sin") == 0)
-    {
-        #ifdef DEBUG
-            printf("sin\n");
-        #endif
-
-        val->type   = TYPE_OP;
-        val->val.op = OP_SIN;
-    }
-    else if (strcmp(str, "cos") == 0)
-    {
-        #ifdef DEBUG
-            printf("cos\n");
-        #endif
-
-        val->type   = TYPE_OP;
-        val->val.op = OP_COS;
-    }
-    else if (strcmp(str, "log") == 0)
-    {
-
-        val->type   = TYPE_OP;
-        val->val.op = OP_LOG; 
-    }
-    else if (strcmp(str, "**") == 0)
-    {
-        val->type   = TYPE_OP;
-        val->val.op = OP_POW;
-    }
-    else if (atof(str) == 0 && strcmp(str, "0"))
-    {
-        #ifdef DEBUG
-            printf("var\n");
-        #endif
-
-        val->type    = TYPE_VAR;
-        val->val.var = (char*)calloc(1, strlen(str) + 1);
-
-        assert(val->val.var);
-
-        strcpy(val->val.var, str);
-    }
-    else
-    {
-        val->type    = TYPE_NUM;
-        val->val.dbl = atof(str);
-        
-        #ifdef DEBUG
-            printf("num %lg\n", val->val.dbl);
-        #endif
-    }
-}
-
-void GetNodeFromFile(Node** node, FILE* fp)
-{
-    assert(node);
-    assert(fp);
-
-    int c = 0;
-    while((c = getc(fp)) == ' ' || c == '\n' || c == '\t')
-    {};
-
-    #ifdef DEBUG
-        printf("c = <%c>%d\n", c, c);
-    #endif
-
-    if (c == ')')
-    {
-        *node = nullptr;
-
-        #ifdef DEBUG
-            printf("end node\n");
-        #endif
-
-        return;
-    }
-    else if (c == '(')
-    {
-        #ifdef DEBUG
-            printf("new node\n");
-        #endif
-
-        Node* new_node = (Node*)calloc(1, sizeof(Node));
-
-        assert(new_node);
-
-        new_node->left = nullptr;
-        new_node->right = nullptr;
-
-        #ifdef DEBUG
-            printf("Go to left\n");
-        #endif
-
-        GetNodeFromFile(&(new_node->left), fp);
-        #ifdef DEBUG
-            printf("End left\n");
-        #endif
-        
-        while((c = fgetc(fp)) == ')' || c == '(' || c == ' ' || c == '\n' || c == '\t')
-        {};
-        ungetc(c, fp);
-
-        char new_object[MAX_STR_LEN] = "";
-        fscanf(fp, "%[^()\t\n ]", new_object);
-
-        #ifdef DEBUG
-            printf("\nnew_object = <%s>\n", new_object);
-        #endif
-
-        GetNodeValFromStr(new_object, &(new_node)->val);
-
-        if (IS_OP(new_node) && 
-           (VAL_OP(new_node) == OP_SIN || VAL_OP(new_node) == OP_COS || VAL_OP(new_node) == OP_LOG))
-        {
-            DeleteNode(L(new_node));
-            new_node->left = nullptr;
-        }
-            
-        #ifdef DEBUG
-            printf("\nGo to right\n");
-        #endif
-        GetNodeFromFile(&(new_node->right), fp);
-        #ifdef DEBUG
-            printf("End right\n");
-        #endif
-
-        NodeDtor(*node);
-        *node = new_node;
-    }
-    else
-        ungetc(c, fp);
-}
-
 int GetTreeFromFile(Tree* tree, const char file_name[])
 {
     assert(tree);
@@ -883,9 +713,13 @@ int GetTreeFromFile(Tree* tree, const char file_name[])
     FILE* fp = fopen(file_name, "r");
     CHECK(fp == nullptr, "Error during open file", -1);
 
-    GetNodeFromFile(&(tree->root), fp);
-
+    char function[101] = "";
+    fgets(function, 100, fp);
     fclose(fp);
+
+    printf("function = <%s>\n", function);
+
+    tree->root = GetNodeFromStr(function);
 
     return 0;
 }

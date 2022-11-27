@@ -18,53 +18,58 @@
 \textbf{\LARGE{Исследовательская работа по теме:\\Исследование функции дифференциальными методами}}\end{center}\newpage\textbf{\LARGE Глава I. Функция}
 
 \begin{center}
-$y = $$x^{3}$
+$y = $$x^{cos(x)}$
 
 \end{center}
 \includegraphics{GraphicDumps/plot.jpg}\newpage \textbf{\LARGE Глава II. Визуальный анализ функции}
 
-Очевидно, что
+От коробки до нк все знают, что
 
 \begin{center}
-$y = $$x^{3}$
+$y = $$x^{cos(x)}$
 
 \end{center}
 \newpage \textbf{\LAGRE Глава III. Дифференцирование}
 
-Паршивая функция всё доказательство портит
+Segmentation fault (core dumped)
 
 \begin{center}
  ($x)'
   = 1$\end{center}
-[Данные удалены]
+Если посмотреть на выражение под другим углом, можно получить
 
 \begin{center}
- ($3)'
-  = 0$\end{center}
-Господи, да для кого я вообще стараюсь
+ ($x)'
+  = 1$\end{center}
+Говорят
 
 \begin{center}
- ($x^{3})'
-  = (x^{3} \cdot ((\frac{3}{x} \cdot 1) + (0 \cdot log(x))))$\end{center}
+ ($cos(x))'
+  = (1 \cdot (0 - sin(x)))$\end{center}
+С другой стороны
+
+\begin{center}
+A = $((\frac{cos(x)}{x} \cdot 1) + ((1 \cdot (0 - sin(x))) \cdot log(x)))$\end{center}
+\begin{center}
+ ($x^{cos(x)})'
+  = (x^{cos(x)} \cdot A)$\end{center}
 \newpage \textbf{\LARGE Глава IV.Упрощение выражения}
 
-Спешка нужна только в армии и при ловле блох. Но не как уж ни при вычислении производной
+Таким образом
 
 \begin{center}
-$(\frac{3}{x} \cdot 1) = \frac{3}{x}$\end{center}
-Segmentation fault (core dumped)
+$(\frac{cos(x)}{x} \cdot 1) = \frac{cos(x)}{x}$\end{center}
+Руководствуясь базовой логикой, получаем
 
 \begin{center}
-$(0 \cdot log(x)) = 0$\end{center}
-Если вы не понимаете этот переход, то я вам сочувствую
-
-\begin{center}
-$(\frac{3}{x} + 0) = \frac{3}{x}$\end{center}
+$(1 \cdot (0 - sin(x))) = (0 - sin(x))$\end{center}
 \newpage \textbf{\LARGE Глава V. Полученая производная}
 
-$y = $$x^{3}$
+$y = $$x^{cos(x)}$
 
-$y' = $$(x^{3} \cdot \frac{3}{x})$
+\begin{center}
+A = $(\frac{cos(x)}{x} + ((0 - sin(x)) \cdot log(x)))$\end{center}
+$y' = $$(x^{cos(x)} \cdot A)$
 
 \includegraphics{GraphicDumps/plot_1.jpg}
 \end{document}
