@@ -1,6 +1,10 @@
 digraph G{
 node[shape = record, fontsize = 14];
 splines = ortho
-info[label = "root = 0x0000D0"]
-Node0000D0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>0000D0 \n | { <v>NUM | 2934.000000} | { <l> 000000  |<r>  000000}}"]
+info[label = "root = 0x000110"]
+Node000110[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000110 \n | { <v>OPER | sin} | { <l> 000000  |<r>  000150}}"]
+Node000110 -> Node000150[xlabel = "R"]
+Node000150[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000150 \n | { <v>OPER | sin} | { <l> 000000  |<r>  000190}}"]
+Node000150 -> Node000190[xlabel = "R"]
+Node000190[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000190 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
 }

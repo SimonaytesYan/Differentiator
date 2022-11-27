@@ -2,5 +2,7 @@ digraph G{
 node[shape = record, fontsize = 14];
 splines = ortho
 info[label = "root = 0x000050"]
-Node000050[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000050 \n | { <v>NUM | 5.000000} | { <l> 000000  |<r>  000000}}"]
+Node000050[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000050 \n | { <v>OPER | sin} | { <l> 000000  |<r>  000090}}"]
+Node000050 -> Node000090[xlabel = "R"]
+Node000090[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000090 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
 }

@@ -9,8 +9,7 @@ const int TESTS_NUMBER = 15;
 
 int main()
 {
-    FILE* fp = fopen("Tests", "r");
-    system("dir");
+    FILE* fp = fopen("RecursiveDescentTests", "r");
     assert(fp);
 
     for(int i = 0; i < TESTS_NUMBER; i++)

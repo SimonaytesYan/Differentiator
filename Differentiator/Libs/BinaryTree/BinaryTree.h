@@ -338,7 +338,6 @@ static Node* NodeCtorVar(char* val)
     Node_t node_val  = {};
     node_val.type    = TYPE_VAR;
     node_val.val.var = val;
-    printf("new var = <%s>\n", val);
 
     NodeCtor(new_node, node_val);
 
