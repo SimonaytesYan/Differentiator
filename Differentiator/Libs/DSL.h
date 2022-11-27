@@ -89,41 +89,41 @@ const double PRECISION = 1e-6;
 
 #define PUT_PLUS                    \
     case OP_PLUS:                   \
-        fprintf(stream, " + ");     \
+        fprintf(stream, "+");     \
         break;
 
 #define PUT_SUB                     \
     case OP_SUB:                    \
-        fprintf(stream, " - ");     \
+        fprintf(stream, "-");     \
         break;
         
 #define PUT_MUL                     \
     case OP_MUL:                    \
-        fprintf(stream, " * ");     \
+        fprintf(stream, "*");     \
         break;
         
 #define PUT_DIV                     \
     case OP_DIV:                    \
-        fprintf(stream, " / ");     \
+        fprintf(stream, "/");     \
         break;
 
 #define PUT_SIN                     \
     case OP_SIN:                    \
-        fprintf(stream, " sin ");   \
+        fprintf(stream, "sin");   \
         break;
 
 #define PUT_COS                     \
     case OP_COS:                    \
-        fprintf(stream, " cos ");   \
+        fprintf(stream, "cos");   \
         break;
 
 #define PUT_LOG                      \
     case OP_LOG:                     \
-        fprintf(stream, " log ");    \
+        fprintf(stream, "log");    \
         break;
 
 #define PUT_POW                     \
     case OP_POW:                    \
-        fprintf(stream, " ** ");    \
+        fprintf(stream, "**");    \
         break;
 #endif

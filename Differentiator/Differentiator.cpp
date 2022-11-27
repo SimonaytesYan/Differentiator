@@ -17,6 +17,8 @@ FILE* LatexFp = nullptr;
 
 static void  GetNodeValFromStr(const char str[], Node_t* val);
 
+static bool  IsNodeConst(Node* node);
+
 static void  PrintElem(FILE* stream, Node* elem);
 
 static void  PrintfInLatexEndDoc();
@@ -91,6 +93,23 @@ void PrintfInLatexReal(const char* function, const char *format, ...)
 
     va_end(args);
     fflush(LatexFp);
+}
+
+static bool IsNodeConst(Node* node)
+{
+    if (node == nullptr)
+        return true;
+    
+    if (TYPE(node) == TYPE_VAR)
+        return false;
+    
+    bool result = true;
+    if (!IsNodeConst(L(node)))
+        return false;
+    if (!IsNodeConst(R(node)))
+        return false;
+
+    return true;
 }
 
 static int  GetOpRank(Node* node)
@@ -235,23 +254,66 @@ static Node* DiffLog(Node* node)
 
 static Node* DiffPow(Node* node)
 {
-    Node* new_node = NodeCtorOp(OP_MUL);
+    Node* new_node = nullptr;
 
-    L(new_node)  = CpyNode(node);
-    R(new_node)  = NodeCtorOp(OP_PLUS);
+    bool const_basis     = IsNodeConst(L(node));
+    bool const_indicator = IsNodeConst(R(node));
 
-    RL(new_node) = NodeCtorOp(OP_MUL);
-    RR(new_node) = NodeCtorOp(OP_MUL);
+    if (const_basis)
+    {
+        if (const_indicator)
+        {
+            new_node = NodeCtorNum(0);
+        }
+        else
+        {
+            new_node = NodeCtorOp(OP_MUL);
+            
+            R(new_node) = Diff(R(node));
 
-    L(RL(new_node)) = NodeCtorOp(OP_DIV);
-    R(RL(new_node)) = Diff(L(node));
+            L(new_node)     = NodeCtorOp(OP_MUL);
+            LR(new_node)    = CpyNode(node);
+            LL(new_node)    = NodeCtorOp(OP_LOG);
+            R(LL(new_node)) = CpyNode(R(node));
+        }
+    }
+    else if (const_indicator)
+    {
+        new_node = NodeCtorOp(OP_MUL);
+        R(new_node) = Diff(L(node));
 
-    LL(RL(new_node)) = CpyNode(R(node));
-    LR(RL(new_node)) = CpyNode(L(node));
+        L(new_node)     = NodeCtorOp(OP_MUL);
+        LL(new_node)    = NodeCtorOp(OP_SUB);
+        L(LL(new_node)) = CpyNode(R(node));
+        R(LL(new_node)) = NodeCtorNum(1);
+            
+        LR(new_node)     = NodeCtorOp(OP_POW);
+        L(LR(new_node))  = CpyNode(L(node));
+        R(LR(new_node))  = NodeCtorOp(OP_SUB);
+        RL(LR(new_node)) = CpyNode(R(node));
+        RR(LR(new_node)) = NodeCtorNum(1);
 
-    L(RR(new_node))  = Diff(R(node));
-    R(RR(new_node))  = NodeCtorOp(OP_LOG);
-    RR(RR(new_node)) = CpyNode(L(node));
+    }
+    else
+    {
+        new_node = NodeCtorOp(OP_MUL);
+
+        L(new_node)  = CpyNode(node);
+        R(new_node)  = NodeCtorOp(OP_PLUS);
+
+        RL(new_node) = NodeCtorOp(OP_MUL);
+        RR(new_node) = NodeCtorOp(OP_MUL);
+
+        L(RL(new_node)) = NodeCtorOp(OP_DIV);
+        R(RL(new_node)) = Diff(L(node));
+
+        LL(RL(new_node)) = CpyNode(R(node));
+        LR(RL(new_node)) = CpyNode(L(node));
+
+        L(RR(new_node))  = Diff(R(node));
+        R(RR(new_node))  = NodeCtorOp(OP_LOG);
+        RR(RR(new_node)) = CpyNode(L(node));
+    }
 
     ReturnAndTex;
 }

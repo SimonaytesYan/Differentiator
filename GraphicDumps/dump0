@@ -1,12 +1,18 @@
 digraph G{
 node[shape = record, fontsize = 14];
 splines = ortho
-info[label = "root = 0x7A1620"]
-Node7A1620[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7A1620 \n | { <v>OPER | **} | { <l> 7A1540  |<r>  7A1580}}"]
-Node7A1620 -> Node7A1540[xlabel = "L"]
-Node7A1620 -> Node7A1580[xlabel = "R"]
-Node7A1540[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7A1540 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
-Node7A1580[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7A1580 \n | { <v>OPER | cos} | { <l> 000000  |<r>  7A15E0}}"]
-Node7A1580 -> Node7A15E0[xlabel = "R"]
-Node7A15E0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>7A15E0 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
+info[label = "root = 0x6E16A0"]
+Node6E16A0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E16A0 \n | { <v>OPER | **} | { <l> 6E1520  |<r>  6E1660}}"]
+Node6E16A0 -> Node6E1520[xlabel = "L"]
+Node6E16A0 -> Node6E1660[xlabel = "R"]
+Node6E1520[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1520 \n | { <v>NUM | 2.000000} | { <l> 000000  |<r>  000000}}"]
+Node6E1660[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1660 \n | { <v>OPER | -} | { <l> 6E15E0  |<r>  6E1620}}"]
+Node6E1660 -> Node6E15E0[xlabel = "L"]
+Node6E1660 -> Node6E1620[xlabel = "R"]
+Node6E15E0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E15E0 \n | { <v>OPER | +} | { <l> 6E1560  |<r>  6E15A0}}"]
+Node6E15E0 -> Node6E1560[xlabel = "L"]
+Node6E15E0 -> Node6E15A0[xlabel = "R"]
+Node6E1560[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1560 \n | { <v>NUM | 82980.000000} | { <l> 000000  |<r>  000000}}"]
+Node6E15A0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E15A0 \n | { <v>NUM | 1.000000} | { <l> 000000  |<r>  000000}}"]
+Node6E1620[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1620 \n | { <v>NUM | 0.000000} | { <l> 000000  |<r>  000000}}"]
 }
