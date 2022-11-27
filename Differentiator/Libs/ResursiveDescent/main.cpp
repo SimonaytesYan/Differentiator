@@ -3,7 +3,6 @@
 #include "RecursiveDescent.h"
 
 #include "../TreeSetup.h"
-#include "../BinaryTree/BinaryTree.h"
 
 const int TESTS_NUMBER = 15;
 

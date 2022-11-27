@@ -17,13 +17,7 @@ int   GetTreeFromFile(Tree* tree, const char file_name[]);
 
 void  OutputGraphicDump(Tree* tree);
 
-int   OpenLatexFile(const char file_name[]);
-
-void  TexNode(Node* root);
-
 void  TexNodeWithDesignations(Node* root, const char pre_decoration[]);
-
-void  CloseLatexFile();
 
 Node* Diff(Node* node);
 
@@ -33,10 +27,5 @@ void  SimplifyTree(Tree* tree);
 
 void  ConstsConvolution(Node* node);
 
-void PrintfInLatexReal(const char* function, const char *format, ...);
-
-void PrintRandBundleInLatex();
-
-#define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
 #endif //__DIFFERENTIATOR_SYM__

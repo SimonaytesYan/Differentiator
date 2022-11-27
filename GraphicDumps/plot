@@ -3,4 +3,4 @@ set output "GraphicDumps/plot.jpg"
 set grid x
 set grid y
 set xrange [-10.000000:10.000000]
-plot ((2)**(((82980)+(1))-(0))) lt rgb "green" lw 2
+plot ((sin(log((x)**(cos(x)))))/(log((1)-((5)*((x)**(3)))))) lt rgb "green" lw 2

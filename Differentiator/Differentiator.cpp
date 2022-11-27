@@ -1,29 +1,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdarg.h>
 #include <math.h>
 
 #include "Differentiator.h"
-#include "Libs/Bundles.h"
 #include "Libs/DSL.h"
 #include "Libs/ResursiveDescent/RecursiveDescent.h"
+#include "Libs/LatexOutput/LatexOutput.h"
 
 //#define DEBUG
 
-FILE* LatexFp = nullptr;
-
 //--------------------FUNCTION PROTOTIPES--------------------
-
-static void  GetNodeValFromStr(const char str[], Node_t* val);
 
 static bool  IsNodeConst(Node* node);
 
 static void  PrintElem(FILE* stream, Node* elem);
-
-static void  PrintfInLatexEndDoc();
-
-static void  PrintInLatexStartDoc();
 
 static Node* NodeCtorNum(double val);
 
@@ -43,10 +34,6 @@ static Node* DiffSum(Node* node_arg);
 
 static Node* DiffSub(Node* node_arg);
 
-static void  PostFuncTexNode(Node* node, void* dfs_fp);
-
-static void  PreFuncTexNode(Node* node, void* dfs_fp);
-
 static void  RemoveNeutralElem(Node* node);
 
 static void  RemoveNeutralPlus(Node* node);
@@ -63,37 +50,17 @@ static int   GetOpRank(OPER_TYPES operation);
 
 static int   GetLetterFromIndes(int index);
 
-static void  PrintElemInLatex(Node* node, void* dfs_fp);
-
 static void  TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height);
 
-static int AnalisNodeForDesignation(Node* node, Node** Designations, int height);
+static int   AnalisNodeForDesignation(Node* node, Node** Designations, int height);
 
-static void PrintAllDesignations(Node** Designations);
+static void  PrintAllDesignations(Node** Designations);
 
-static void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_decoration[],
+static void  TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_decoration[],
                                                              const char in_decoration[]);
 
 //--------------------FUNCTION IMPLEMENTATION--------------------
 
-#define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
-
-void PrintfInLatexReal(const char* function, const char *format, ...)
-{
-    if (LatexFp == nullptr)
-    {
-        fprintf(stderr, "%s\n", function);
-        assert(LatexFp == nullptr);
-    }
-
-    va_list args;
-    va_start(args, format);
-
-    vfprintf(LatexFp, format, args);
-
-    va_end(args);
-    fflush(LatexFp);
-}
 
 static bool IsNodeConst(Node* node)
 {
@@ -143,11 +110,6 @@ static int  GetOpRank(Node* node)
             return -1;
     }
     
-}
-
-void PrintRandBundleInLatex()
-{
-    PrintfInLatex("%s", BUNDLES[rand() % BUNDLES_NUMBER]);
 }
 
 static Node* DiffDiv(Node* node)
@@ -454,57 +416,6 @@ void PrintElemInLog(Node_t elem)
     LogPrintf("}\n");
 }
 
-static void PrintInLatexStartDoc()
-{
-    PrintfInLatex("\\documentclass[12pt,a4paper,fleqn]{article}\n"
-                  "\\usepackage[utf8]{inputenc}\n"
-                  "\\usepackage[russian]{babel}\n"
-                  "\\usepackage{amssymb, amsmath, multicol}\n"
-                  "\\usepackage{enumitem}\n"
-                  "\\usepackage{lipsum}\n"
-                  "\\usepackage{euler}\n"
-                  "\\oddsidemargin=-15.4mm\n"
-                  "\\textwidth=190mm\n"
-                  "\\headheight=-32.4mm\n"
-                  "\\textheight=277mm\n"
-                  "\\parindent=0pt\n"
-                  "\\parskip=8pt\n"
-                  "\\pagestyle{empty}\n"
-                  "\\usepackage{graphicx}\n"
-
-                  "\\begin{document}\n"
-                  "\\begin{center}\n"
-                  "\\textbf{\\LARGE{Исследовательская работа по теме:\\\\"
-                  "Исследование функции дифференциальными методами}}"
-                  "\\end{center}"
-                  "\\newpage"
-                 );
-}
-
-static void PrintfInLatexEndDoc()
-{
-    PrintfInLatex("\n"
-                  "\\end{document}");
-}
-
-int OpenLatexFile(const char file_name[])
-{
-    LatexFp = fopen(file_name, "w");
-    CHECK(LatexFp == nullptr, "Error during open file", -1);
-    
-    PrintInLatexStartDoc();
-
-    return 0;
-}
-
-void CloseLatexFile()
-{
-    PrintfInLatexEndDoc();
-
-    fclose(LatexFp);
-    LatexFp = nullptr;
-}
-
 void EnterNewDesignation(Node* Designations[], Node* new_designation)
 {
     assert(Designations);
@@ -627,8 +538,6 @@ void TexNodeWithDesignations(Node* root, const char pre_decoration[])
     PrintfInLatex("$");
     TexNodeWithDesignationsDFS(root, Designations, 0);
     PrintfInLatex("$\n\n");
-
-    fflush(LatexFp);
 }
 
 void TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height)
@@ -649,121 +558,15 @@ void TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height)
         }
     }
 
-    PreFuncTexNode(node, LatexFp);
+    PreFuncTexNode(node, nullptr);
 
     TexNodeWithDesignationsDFS(L(node), Designations, height + 1);
     
-    PrintElemInLatex(node, LatexFp);
+    PrintElemInLatex(node, nullptr);
 
     TexNodeWithDesignationsDFS(R(node), Designations, height + 1);
 
-    PostFuncTexNode(node, LatexFp);
-}
-
-
-static void PreFuncTexNode(Node* node, void* dfs_fp)
-{
-    FILE* stream = (FILE*)dfs_fp;
-                            
-    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
-        fprintf(stream, "\\frac{");
-    else if (!IS_NUM(node) && !IS_VAR(node))
-    {
-        if (VAL_OP(node) != OP_SIN && VAL_OP(node) != OP_COS && 
-            VAL_OP(node) != OP_LOG && VAL_OP(node) != OP_POW)
-            fprintf(stream, "(");
-    }
-}
-
-static void PrintElemInLatex(Node* node, void* dfs_fp)
-{
-    assert(node);
-
-    FILE* stream = (FILE*)dfs_fp;
-
-    switch (TYPE(node))
-    {
-    case TYPE_VAR:
-        fprintf(stream, "%s", VAL_VAR(node));
-        break;
-    case TYPE_OP:
-        switch(VAL_OP(node))
-        {
-            PUT_PLUS
-            PUT_SUB
-
-            case OP_SIN:
-                fprintf(stream, "sin(");
-                break;
-            
-            case OP_COS:
-                fprintf(stream, "cos(");
-                break;
-
-            case OP_LOG:
-                fprintf(stream, "log(");
-                break;
-
-            case OP_POW:
-                fprintf(stream, "^{");
-                break;
-
-            case OP_MUL:
-                fprintf(stream, " \\cdot ");
-                break;
-
-            case OP_DIV:
-                fprintf(stream, "}{");
-                break;
-            
-            case UNDEF_OPER_TYPE:
-                fprintf(stream, "?");
-                break;
-
-            default:
-                fprintf(stream, "#");
-                break;
-        }
-        break;
-    case TYPE_NUM:
-        fprintf(stream, "%lg", VAL_N(node));
-        break;
-    case UNDEF_NODE_TYPE:
-        fprintf(stream, "\n");
-        break;
-    default:
-        fprintf(stream, "\t");
-        break;
-    }
-}
-
-static void PostFuncTexNode(Node* node, void* dfs_fp)
-{
-    FILE* stream = (FILE*)dfs_fp;
-
-    if (IS_OP(node) && (VAL_OP(node) == OP_DIV || VAL_OP(node) == OP_POW))
-        fprintf(stream, "}");
-    else if (!IS_NUM(node) && !IS_VAR(node))
-        fprintf(stream, ")");
-}
-
-void TexNode(Node* root)
-{
-    assert(root);
-
-    #ifdef DEBUG
-        printf("Start tex node\n");    
-    #endif
-
-    PrintfInLatex("$");
-
-    DFS(root, PreFuncTexNode,   LatexFp,
-              PrintElemInLatex, LatexFp,
-              PostFuncTexNode,  LatexFp);
-
-    PrintfInLatex("$");
-
-    fflush(LatexFp);
+    PostFuncTexNode(node, nullptr);
 }
 
 int GetTreeFromFile(Tree* tree, const char file_name[])

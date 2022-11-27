@@ -3,4 +3,4 @@ set output "GraphicDumps/plot_1.jpg"
 set grid x
 set grid y
 set xrange [-10.000000:10.000000]
-plot ((2)**(((82980)+(1))-(0))) lt rgb "green" lw 2, (0) lt rgb "red" lw 2
+plot ((sin(log((x)**(cos(x)))))/(log((1)-((5)*((x)**(3)))))) lt rgb "green" lw 2, (((((((1)/((x)**(cos(x))))*(((x)**(cos(x)))*(((cos(x))/(x))+(((0)-(sin(x)))*(log(x))))))*(cos(log((x)**(cos(x))))))*(log((1)-((5)*((x)**(3))))))-((((1)/((1)-((5)*((x)**(3)))))*((0)-((5)*((2)*((x)**(2))))))*(sin(log((x)**(cos(x)))))))/((log((1)-((5)*((x)**(3)))))*(log((1)-((5)*((x)**(3))))))) lt rgb "red" lw 2

@@ -1,6 +1,7 @@
 #include "time.h"
 
 #include "Differentiator/Differentiator.h"
+#include "Differentiator/Libs/LatexOutput/LatexOutput.h"
 #include "Differentiator/Libs/ConstructGraphics/ConstructGraphics.h"
 
 int main()
