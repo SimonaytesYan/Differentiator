@@ -7,6 +7,16 @@
 
 int main()
 {
+    Node_t a  = {};
+    Node_t b  = {};
+    a.type    = TYPE_OP;
+    a.val.op  = OP_MUL;
+    
+    b.type    = TYPE_OP;
+    b.val.op  = OP_MUL;
+
+    printf("comp(a, b) = %d\n",CmpNode_t(&a, &b));
+
     srand(time(NULL));
     printf("Star main\n");
 
@@ -20,7 +30,7 @@ int main()
     printf("Tree got\n");
 
     GraphicDump(&tree);
-    PrintfInLatex("\\textbf{\\LARGE Глава I. Функция}\n\n");
+    PrintfInLatex("\\textbf{\\LARGE{Глава I. Функция}}\n\n");
     TexNodeWithDesignations(tree.root, "\\begin{center}\n""$y = $");
     PrintfInLatex("\\end{center}\n");
 
@@ -28,12 +38,12 @@ int main()
     GrahicParamCtor(&graphic, &tree, -10, 10, "green");
     ConstructGraphInTex(&graphic);
 
-    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава II. Визуальный анализ функции}\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LARGE{Глава II. Визуальный анализ функции}}\n\n");
     PrintRandBundleInLatex();
     TexNodeWithDesignations(tree.root, "\\begin{center}\n""$y = $");
     PrintfInLatex("\\end{center}\n");
 
-    PrintfInLatex("\\newpage \\textbf{\\LAGRE Глава III. Дифференцирование}\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LAGRE{Глава III. Дифференцирование}}\n\n");
     
     Tree DTree = {};
     TreeCtor(&DTree);
@@ -41,11 +51,11 @@ int main()
     DeleteNode(DTree.root);
     DTree.root = Diff(tree.root);
     
-    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава IV.Упрощение выражения}\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LARGE{Глава IV.Упрощение выражения}}\n\n");
 
     SimplifyTree(&DTree);
     
-    PrintfInLatex("\\newpage \\textbf{\\LARGE Глава V. Полученая производная}\n\n");
+    PrintfInLatex("\\newpage \\textbf{\\LARGE{Глава V. Полученая производная}}\n\n");
 
     TexNodeWithDesignations(tree.root,  "$y = $");
     TexNodeWithDesignations(DTree.root, "$y' = $");

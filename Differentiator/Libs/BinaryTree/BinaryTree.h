@@ -76,11 +76,37 @@ static void  DeleteNode(Node* node);
  
 static void  DFSNodeDtor(Node* node);
 
+static int   CmpNode_t(Node_t* a, Node_t* b);
+
+static int   CmpNode_t(Node_t* a, Node_t* b)
+{
+    if (a->type != b->type)
+        return 1;
+    
+    switch (a->type)
+    {
+        case TYPE_NUM:
+            return a->val.dbl != b->val.dbl;
+        case TYPE_OP:
+            return a->val.op  != b->val.op;
+        case TYPE_VAR:
+            return strcmp(a->val.var, b->val.var);
+        
+        case UNDEF_NODE_TYPE:
+            return 0;
+        default:
+            return 0;
+    }
+}
+
 int NodeCmp(Node* node_a, Node* node_b)
 {
     if (node_a == nullptr && node_b == nullptr)
         return 0;
     if (node_a == nullptr || node_b == nullptr)
+        return 1;
+
+    if (CmpNode_t(&(node_a->val), &(node_b->val)))
         return 1;
 
     if (NodeCmp(node_a->left, node_b->left) != 0)

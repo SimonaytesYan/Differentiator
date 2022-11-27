@@ -17,5 +17,4 @@ void  OutputGraphicDump(Tree* tree);
 
 Node* Diff(Node* node);
 
-
 #endif //__DIFFERENTIATOR_SYM__
