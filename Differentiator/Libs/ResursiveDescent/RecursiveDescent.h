@@ -1,9 +1,4 @@
-int GetG(const char* str);
+#include "../TreeSetup.h"
+#include "../BinaryTree/BinaryTree.h"
 
-int GetE();
-
-int GetT();
-
-int GetP();
-
-int GetN();
+Node* GetG(const char* str);

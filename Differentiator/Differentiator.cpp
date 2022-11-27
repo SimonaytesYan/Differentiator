@@ -129,45 +129,6 @@ void PrintRandBundleInLatex()
     PrintfInLatex("%s", BUNDLES[rand() % BUNDLES_NUMBER]);
 }
 
-static Node* NodeCtorNum(double val)
-{
-    Node* new_node = (Node*)calloc(1, sizeof(Node));
-
-    Node_t node_val  = {};
-    node_val.type    = TYPE_NUM;
-    node_val.val.dbl = val;
-
-    NodeCtor(new_node, node_val);
-
-    return new_node;
-}
-
-static Node* NodeCtorVar(char* val)
-{
-    Node* new_node = (Node*)calloc(1, sizeof(Node));
-
-    Node_t node_val  = {};
-    node_val.type    = TYPE_VAR;
-    node_val.val.var = val;
-
-    NodeCtor(new_node, node_val);
-
-    return new_node;
-}
-
-static Node* NodeCtorOp(OPER_TYPES val)
-{
-    Node* new_node = (Node*)calloc(1, sizeof(Node));
-
-    Node_t node_val  = {};
-    node_val.type    = TYPE_OP;
-    node_val.val.op  = val;
-
-    NodeCtor(new_node, node_val);
-
-    return new_node;
-}
-
 static Node* DiffDiv(Node* node)
 {
     Node* new_node = NodeCtorOp(OP_DIV);
@@ -601,7 +562,7 @@ void TexNodeWithDesignations(Node* root, const char pre_decoration[])
 
     PrintfInLatex("$");
     TexNodeWithDesignationsDFS(root, Designations, 0);
-    PrintfInLatex("$");
+    PrintfInLatex("$\n\n");
 
     fflush(LatexFp);
 }
@@ -1129,35 +1090,4 @@ static void RemoveNeutralElem(Node* node)
         default:
             break;
     }
-}
-
-void ConstructGraphInTex(Tree* tree, const char color[], int left_x_border, int right_x_border)
-{
-    FILE* fp = fopen(PLOT_PATH, "w");
-    
-    fprintf(fp, "set terminal jpeg size 600,600\n"
-                "set output \"%s.jpg\"\n", PLOT_PATH);
-    fprintf(fp, "set grid x\n"
-                "set grid y\n"
-                "set xrange [%d:%d]\n", left_x_border, right_x_border);
-    fprintf(fp, "plot ");
-
-    SaveTreeInFile(tree, fp);
-
-    fprintf(fp, " lt rgb \"%s\" lw 2\n", color);
-
-    char comand[100] = "";
-    sprintf(comand, "gnuplot %s", PLOT_PATH);
-
-    #ifdef DEBUG
-        printf("comand = <%s>\n", comand);
-    #endif
-
-    fflush(fp);
-    
-    system(comand);
-
-    PrintfInLatex("\\includegraphics{%s.jpg}", PLOT_PATH);
-
-    fclose(fp);
 }

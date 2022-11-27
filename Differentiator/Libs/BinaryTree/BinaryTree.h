@@ -13,8 +13,9 @@
 #include "../Errors.h"
 #include "../DSL.h"
 
-static const char   COMAND_PROTOTYPE[] = "dot GraphicDumps/dump%d -o GraphicDumps/Dump%d.png -T png";
-static       int    GRAPHIC_DUMP_CNT   = 0;
+static const char COMAND_PROTOTYPE[] = "dot GraphicDumps/dump%d -o GraphicDumps/Dump%d.png -T png";
+static       int  GRAPHIC_DUMP_CNT   = 0;
+static const int  MAX_VAR_NAME_LEN   = 10; 
 
 typedef struct Node 
 {
@@ -41,33 +42,39 @@ typedef struct Tree
     LogInfo debug     = {};
 }Tree;
 
-static int  TreeCheck(Tree* tree);
+static int   NodeCtor(Node* node, Node_t val);
 
-static int  NodeCtor(Node* node, Node_t val);
+static Node* NodeCtorNum(double val);
 
-static int  TreeConstructor(Tree* tree, int capacity, int line, const char* name, const char* function, const char* file);
+static Node* NodeCtorOp(OPER_TYPES val);
 
-static int  TreeDtor(Tree* tree);
+static Node* NodeCtorVar(char* val);
 
-static void DumpTree(Tree* tree, const char* function, const char* file, int line);
-
-static void GraphicDump(Tree* tree);
-
-static int  TreeInsertLeafRight(Tree* tree, const Node_t value, Node* after_which);
-
-static int  TreeInsertLeafLeft(Tree* tree, const Node_t value, Node* after_which);
-
-static int  TreeIterate(Tree* tree, Node** index);
-
-static void DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* args2, DFS_f post_func, void* args3);
-
-static void DeleteNode(Node* node);
-
-static void DFSNodeDtor(Node* node);
-
-static int NodeCmp(Node* node_a, Node* node_b);
+static int   NodeCmp(Node* node_a, Node* node_b);
 
 static Node* CpyNode(Node* node);
+
+static int  TreeCheck(Tree* tree);
+
+static int   TreeConstructor(Tree* tree, int capacity, int line, const char* name, const char* function, const char* file);
+ 
+static int   TreeDtor(Tree* tree);
+ 
+static void  DumpTree(Tree* tree, const char* function, const char* file, int line);
+ 
+static void  GraphicDump(Tree* tree);
+ 
+static int   TreeInsertLeafRight(Tree* tree, const Node_t value, Node* after_which);
+ 
+static int   TreeInsertLeafLeft(Tree* tree, const Node_t value, Node* after_which);
+ 
+static int   TreeIterate(Tree* tree, Node** index);
+ 
+static void  DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* args2, DFS_f post_func, void* args3);
+ 
+static void  DeleteNode(Node* node);
+ 
+static void  DFSNodeDtor(Node* node);
 
 int NodeCmp(Node* node_a, Node* node_b)
 {
@@ -102,17 +109,6 @@ static void DFS(Node* node, DFS_f pre_func, void* args1, DFS_f in_func, void* ar
 
     if (post_func != nullptr)
         post_func(node, args3);
-}
-
-static int NodeCtor(Node* node, Node_t val)
-{
-    assert(node);
-
-    node->val   = val;
-    node->left  = nullptr;
-    node->right = nullptr;
-
-    return 0;
 }
 
 static void WriteNodeAndEdge(Node* node, void* fp_void)
@@ -309,6 +305,57 @@ static int TreeConstructor(Tree* tree, int line, const char* name, const char* f
     tree->debug.status   = true;
 
     return TreeCheck(tree);
+}
+
+static int NodeCtor(Node* node, Node_t val)
+{
+    assert(node);
+
+    node->val   = val;
+    node->left  = nullptr;
+    node->right = nullptr;
+
+    return 0;
+}
+
+static Node* NodeCtorNum(double val)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    Node_t node_val  = {};
+    node_val.type    = TYPE_NUM;
+    node_val.val.dbl = val;
+
+    NodeCtor(new_node, node_val);
+
+    return new_node;
+}
+
+static Node* NodeCtorVar(char* val)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    Node_t node_val  = {};
+    node_val.type    = TYPE_VAR;
+    node_val.val.var = val;
+    printf("new var = <%s>\n", val);
+
+    NodeCtor(new_node, node_val);
+
+    return new_node;
+}
+
+static Node* NodeCtorOp(OPER_TYPES val)
+{
+    Node* new_node = (Node*)calloc(1, sizeof(Node));
+
+    Node_t node_val  = {};
+    node_val.type    = TYPE_OP;
+    node_val.val.op  = val;
+
+    NodeCtor(new_node, node_val);
+
+    return new_node;
 }
 
 static void NodeDtor(Node* node)

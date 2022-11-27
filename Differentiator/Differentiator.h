@@ -10,8 +10,6 @@ const int   MAX_DIS_NUM                 = 52;
 const int   THRESHOLD_ENTER_DESIGNATION = 10;
 const char  DEFAULT_TREE_NAME[]         = "Tree";
 const char  DEFAULT_TEX_NAME[]          = "Zorich_3_volume.tex";
-const char  PLOT_PATH[]                 = "GraphicDumps/plot";
-
 
 int   SaveTreeInFile(Tree* tree, FILE* fp);
 
@@ -42,8 +40,6 @@ void  ConstsConvolution(Node* node);
 void PrintfInLatexReal(const char* function, const char *format, ...);
 
 void PrintRandBundleInLatex();
-
-void ConstructGraphInTex(Tree* tree, const char color[], int left_x_border, int right_x_border);
 
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 

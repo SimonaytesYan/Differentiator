@@ -1,6 +1,0 @@
-set terminal jpeg size 600,600
-set output "GraphicDumps/plot.jpg"
-set grid x
-set grid y
-set xrange [-10:10]
-plot ((x) ** (3)) lt rgb "green" lw 2
