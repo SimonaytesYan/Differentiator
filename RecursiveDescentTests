@@ -1,3 +1,6 @@
+x**2;
+x**x**x;
+y+sin(x**2);
 sin(x);
 sin(sin(x));
 5;
@@ -6,7 +9,7 @@ sin(sin(x));
 5*x;
 x;
 2+x*(3+4542/2)-y;
-y+sin(a*cos(log(1))); 
+y+sin(a*cos(log(1)));
 -5;
 +7;
 -19*7;
