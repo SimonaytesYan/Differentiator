@@ -24,22 +24,22 @@ static int   AnalisNodeForDesignation(Node* node, Node** Designations, int heigh
 static void  PrintAllDesignations(Node** Designations);
 
 
-void SimplifyTree(Tree* tree)
+void SimplifyNode(Node* node)
 {
-    assert(tree);
+    assert(node);
 
-    Node* old_tree = nullptr;
+    Node* old_node = nullptr;
     do
     {
-        DeleteNode(old_tree);
-        old_tree = CpyNode(tree->root);
+        DeleteNode(old_node);
+        old_node = CpyNode(node);
 
-        ConstsConvolution(tree->root);
-        RemoveNeutralElem(tree->root);
+        ConstsConvolution(node);
+        RemoveNeutralElem(node);
     }
-    while(NodeCmp(old_tree, tree->root));
+    while(NodeCmp(old_node, node));
 
-    DeleteNode(old_tree);
+    DeleteNode(old_node);
 }
 
 void ConstsConvolution(Node* node)
@@ -166,6 +166,7 @@ static void RemoveNeutralPow(Node* node)
 {
     assert(node);
     
+    //! pow(0,0) = 1. Because I decided so
     if (IS_ONE(L(node)))
     {
         Node* new_node = NodeCtorNum(1);
@@ -178,6 +179,10 @@ static void RemoveNeutralPow(Node* node)
         CpyAndReplace(new_node, node);
         free(new_node);
     }
+    else if (IS_ONE(R(node)))
+        CpyAndReplace(CpyNode(R(node)), node)
+    else if (IS_ZERO(R(node)))
+        CpyAndReplace(NodeCtorNum(1), node);
 }
 
 static void RemoveNeutralElem(Node* node)

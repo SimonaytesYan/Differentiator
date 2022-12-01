@@ -54,17 +54,17 @@ const double PRECISION = 1e-6;
     R(node) = nullptr;
 
 
-#define L(node) node->left
+#define L(node) (node)->left
 
-#define R(node) node->right
+#define R(node) (node)->right
 
-#define LL(node) node->left->left
+#define LL(node) (node)->left->left
 
-#define LR(node) node->left->right
+#define LR(node) (node)->left->right
 
-#define RL(node) node->right->left
+#define RL(node) (node)->right->left
 
-#define RR(node) node->right->right
+#define RR(node) (node)->right->right
 
 
 #define IS_VAR(node) (node->val.type == TYPE_VAR)

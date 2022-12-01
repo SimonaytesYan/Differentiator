@@ -50,12 +50,14 @@ static void PrintInLatexStartDoc()
                   "\\parskip=8pt\n"
                   "\\pagestyle{empty}\n"
                   "\\usepackage{graphicx}\n"
+                  "\\title{\\textbf{\\LARGE{Исследовательская работа по теме:\\\\"
+                  "Исследование функции дифференциальными методами}}}\n"
+                  "\\author{Известный гражданин}\n"
+                  "\\date{November 2022}\n"
+                  "\\addt\\captionsrussian{\\def\\refname{Список литературы}}"
 
                   "\\begin{document}\n"
-                  "\\begin{center}\n"
-                  "\\textbf{\\LARGE{Исследовательская работа по теме:\\\\"
-                  "Исследование функции дифференциальными методами}}"
-                  "\\end{center}"
+                  "\\maketitle\n"
                   "\\newpage"
                  );
 }
@@ -63,6 +65,13 @@ static void PrintInLatexStartDoc()
 static void PrintfInLatexEndDoc()
 {
     PrintfInLatex("\n"
+                  "\\newpage"
+                  "\\begin{thebibliography}{}\n"
+                  "\\bibitem{link1}  \"A Synopsis of Elementary Results in Pure and Applied Mathematics\"\n"
+                  "\\bibitem{link2}  \"Сборник пословиц и поговорок кафедры высшей математики\"\n"
+                  "\\bibitem{link3}  \"Полное собрание лучших высказываний преподавателей МФТИ\"\n"
+                  "\\bibitem{link4}  \"Словарь фраз не несущих смысловой нагрузки кафедры философии. 17 издание\"\n"
+                  "\\end{thebibliography}"
                   "\\end{document}");
 }
 

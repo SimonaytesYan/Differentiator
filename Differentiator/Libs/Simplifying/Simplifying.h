@@ -4,11 +4,11 @@
 #include "../TreeSetup.h"
 
 const int   MAX_DIS_NUM                 = 52;
-const int   THRESHOLD_ENTER_DESIGNATION = 10;
+const int   THRESHOLD_ENTER_DESIGNATION = 14;
 
 void  TexNodeWithDesignations(Node* root, const char pre_decoration[]);
 
-void  SimplifyTree(Tree* tree);
+void  SimplifyNode(Node* node);
 
 void  ConstsConvolution(Node* node);
 

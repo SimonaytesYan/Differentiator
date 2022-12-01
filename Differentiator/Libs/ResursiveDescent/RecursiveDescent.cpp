@@ -1,8 +1,11 @@
 #include <assert.h>
 
 #include "RecursiveDescent.h"
+#include "../Logging/Logging.h"
 
 #define DEBUG
+
+const char* FIRST_ELEM_PTR = nullptr;
 
 //----------------------------
 //G   ::= E ';'
@@ -19,6 +22,22 @@
 //+: x**2; x**x**x; y+sin(x**2); 5; 2934; 14+99; 5*x; x; 2 + x*(3 + 4542/2) - y; sin(sin(x)); y + sin(a * cos(log(1))) 
 //-: -5; +7; -19*7; x + u15; 17l; x + y - ; kl; A
 //----------------------------
+
+const int STD_FUNCTION_NUM = 3;
+
+const Function_t STD_FUNCTION[] = {
+                                    {"sin", OP_SIN},
+                                    {"cos", OP_COS},
+                                    {"log", OP_LOG},
+                                   };
+
+#define CheckSyntaxError(cond, s)                                                       \
+    if (!(cond))                                                                        \
+    {                                                                                   \
+        LogPrintf("Syntax error in symbol %d: %s\n", s - FIRST_ELEM_PTR , #cond);       \
+        fprintf(stderr, "Syntax error in symbol %d: %s\n", s - FIRST_ELEM_PTR , #cond); \
+        return nullptr;                                                                 \
+    }
 
 static Node* GetE(const char** s);
 
@@ -51,8 +70,12 @@ Node* GetNodeFromStr(const char* str)
         printf("(G) s = <%s>\n", str);
     #endif
 
+    FIRST_ELEM_PTR = str;
     Node* val = GetE(&str);
-    assert(*str == ';');
+    if (val == nullptr) return nullptr;
+
+    printf("val = %p\n", val);
+    CheckSyntaxError(*str == ';', str);
 
     return val;
 }
@@ -64,6 +87,7 @@ Node* GetE(const char** s)
     #endif
 
     Node* val = GetT(s);
+    if (val == nullptr) return nullptr;
 
     while (**s == '+' || **s == '-')
     {
@@ -71,6 +95,7 @@ Node* GetE(const char** s)
         (*s)++;
 
         Node* right_node = GetT(s);
+        if (right_node == nullptr) return nullptr;
 
         if (op == '+')
             val = CreateNodeWithChild_Op(val, right_node, OP_PLUS);
@@ -91,12 +116,15 @@ Node* GetT(const char** s)
     #endif
 
     Node* val = GetO(s);
+    if (val == nullptr) return nullptr;
+
     while (**s == '*' || **s == '/')
     {
         char op = **s;
         (*s)++;
 
         Node* right_node = GetO(s);
+        if (right_node == nullptr) return nullptr;
 
         if (op == '*')
             val = CreateNodeWithChild_Op(val, right_node, OP_MUL);
@@ -119,29 +147,33 @@ Node* GetO(const char** s)
 
     const char* old_s = *s;
 
-    Node* node = nullptr;
-    if (!strncmp(*s, "sin", 3))
-    {
-        node = NodeCtorOp(OP_SIN);
-        (*s) += 3;
-        R(node) = GetPow(s);
-    }
-    else if (!strncmp(*s, "cos", 3))
-    {
-        node = NodeCtorOp(OP_COS);
-        (*s) += 3;
-        R(node) = GetPow(s);
-    }
-    else if (!strncmp(*s, "log", 3))
-    {
-        node = NodeCtorOp(OP_LOG);
-        (*s) += 3;
-        R(node) = GetPow(s);
-    }
-    else
-        node = GetPow(s);
+    //!ToDO сделать табличку функций в языке и номеров функций в коде 
 
-    assert(*s != old_s);
+    Node* node = nullptr;
+    bool function_found = false;
+    for(int i = 0; i < STD_FUNCTION_NUM; i++)
+    {
+        size_t lenght = strlen(STD_FUNCTION[i].name);
+
+        if (!strncmp(*s, STD_FUNCTION[i].name, lenght))
+        {
+            node = NodeCtorOp(STD_FUNCTION[i].code);
+            (*s) += lenght;
+            R(node) = GetPow(s);
+            if (R(node) == nullptr) return nullptr;
+
+            function_found = true;
+            break;
+        }
+    }
+
+    if (!function_found)
+    {
+        node = GetPow(s);
+        if (node == nullptr) return nullptr;
+    }
+
+    CheckSyntaxError(*s != old_s, *s);
 
     #ifdef DEBUG
         printf("end O\n");
@@ -156,12 +188,15 @@ Node* GetPow(const char** s)
         printf("(POW) s = <%s>\n", *s);
     #endif
     Node* node = GetP(s);
+    if (node == nullptr) return nullptr;
 
     while (!strncmp(*s, "**", 2))
     {
         (*s)+=2;
         Node* node_right = GetO(s);
-        node             = CreateNodeWithChild_Op(node, node_right, OP_POW);
+        if (node_right == nullptr) return nullptr;
+
+        node = CreateNodeWithChild_Op(node, node_right, OP_POW);
     }
     
     return node;
@@ -178,11 +213,16 @@ Node* GetP(const char** s)
     {
         (*s)++;
         val = GetE(s);
-        assert(**s == ')');
+        if (val == nullptr) return nullptr;
+
+        CheckSyntaxError(**s == ')', *s);
         (*s)++;
     }
     else
+    {
         val = GetV(s);
+        if (val == nullptr) return nullptr;
+    }
 
     #ifdef DEBUG
         printf("end P\n");
@@ -207,7 +247,10 @@ Node* GetV(const char** s)
         node = NodeCtorVar(val);
     }
     else
+    {
         node = GetN(s);
+        if (node == nullptr) return nullptr;
+    }
     
     #ifdef DEBUG
         printf("end V\n");
@@ -231,7 +274,7 @@ Node* GetN(const char** s)
         (*s)++;
     }
 
-    assert(*s != old_s);
+    CheckSyntaxError(*s != old_s, *s);
     Node* new_node = NodeCtorNum(val);
 
     #ifdef DEBUG
