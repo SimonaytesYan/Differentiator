@@ -12,6 +12,11 @@ static void  PrintInLatexStartDoc();
 
 static int   GetOpRank(OPER_TYPES operation);
 
+void CreateNewPage(const char* header)
+{
+    PrintfInLatex("\\newpage \\textbf{\\LARGE{%s}}\n\n", header);    
+}
+
 void PrintfInLatexReal(const char* function, const char *format, ...)
 {
     if (LatexFp == nullptr)

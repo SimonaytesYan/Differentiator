@@ -23,6 +23,8 @@ void PrintElemDFS(FILE* stream, Node* node);
 
 void PrintElem(Node* elem, FILE* stream);
 
+void CreateNewPage(const char* header);
+
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
 #endif

@@ -1,6 +1,7 @@
 #include "ConstructGraphics.h"
 #include "../../Differentiator.h"
 #include "../LatexOutput/LatexOutput.h"
+#include "../InAndOut/InAndOut.h"
 
 int GraphicCounter()
 {
