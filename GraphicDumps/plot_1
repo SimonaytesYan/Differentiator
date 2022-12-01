@@ -3,4 +3,4 @@ set output "GraphicDumps/plot_1.jpg"
 set grid x
 set grid y
 set xrange [-10.000000:10.000000]
-plot (log(x)) lt rgb "green" lw 2, ((1)/(x)) lt rgb "red" lw 2
+plot (sin(x)) lt rgb "green" lw 2, (cos(x)) lt rgb "red" lw 2

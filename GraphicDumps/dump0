@@ -1,0 +1,8 @@
+digraph G{
+node[shape = record, fontsize = 14];
+splines = ortho
+info[label = "root = 0x6E1520"]
+Node6E1520[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1520 \n | { <v>OPER | sin} | { <l> 000000  |<r>  6E1580}}"]
+Node6E1520 -> Node6E1580[xlabel = "R"]
+Node6E1580[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1580 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
+}

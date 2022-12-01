@@ -180,7 +180,7 @@ static void RemoveNeutralPow(Node* node)
         free(new_node);
     }
     else if (IS_ONE(R(node)))
-        CpyAndReplace(CpyNode(R(node)), node)
+        CpyAndReplace(CpyNode(L(node)), node)
     else if (IS_ZERO(R(node)))
         CpyAndReplace(NodeCtorNum(1), node);
 }
