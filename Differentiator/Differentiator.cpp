@@ -14,8 +14,6 @@
 
 static bool  IsNodeConst(Node* node);
 
-static void  PrintElem(FILE* stream, Node* elem);
-
 static Node* NodeCtorNum(double val);
 
 static Node* NodeCtorVar(char* val);
@@ -33,8 +31,6 @@ static Node* DiffCos(Node* node_arg);
 static Node* DiffSum(Node* node_arg);
 
 static Node* DiffSub(Node* node_arg);
-
-static int   GetOpRank(OPER_TYPES operation);
 
 //--------------------FUNCTION IMPLEMENTATION--------------------
 
@@ -54,39 +50,6 @@ static bool IsNodeConst(Node* node)
         return false;
 
     return true;
-}
-
-static int  GetOpRank(Node* node)
-{
-    switch (TYPE(node))
-    {
-        case TYPE_OP:
-            switch (VAL_OP(node))
-            {
-                case OP_POW:
-                case OP_SIN:
-                case OP_LOG:
-                case OP_COS:
-                    return 2;
-                
-                case OP_DIV:
-                case OP_MUL:
-                    return 1;
-                
-                case OP_PLUS:
-                case OP_SUB:
-                    return 0;  
-                
-                default:
-                    return -1;
-            }
-        case TYPE_NUM:
-        case TYPE_VAR:
-            return 0;
-        default:
-            return -1;
-    }
-    
 }
 
 static Node* DiffDiv(Node* node)
@@ -319,69 +282,11 @@ int SaveTreeInFile(Tree* tree, FILE* fp)
     ReturnIfError(TreeCheck(tree));
     CHECK(fp == nullptr, "fp = nullptr", -1);
 
-    DFS_f pre_function = [](Node*, void* dfs_fp)
-                       {
-                            fprintf((FILE*)dfs_fp, "(");
-                       };
-
-    DFS_f in_function  = [](Node* node, void* dfs_fp)
-                        {
-                            PrintElem((FILE*)dfs_fp, node);
-                        };
-
-    DFS_f post_function = [](Node*, void* dfs_fp)
-                        {
-                            fprintf((FILE*)dfs_fp, ")");
-                        };
-
-    DFS(tree->root, pre_function,  fp,
-                    in_function,   fp,
-                    post_function, fp);
+    PrintElemDFS(fp, tree->root);
 
     fflush(fp);
 
     return 0;
-}
-
-static void PrintElem(FILE* stream, Node* elem)
-{
-    switch (TYPE(elem))
-    {
-    case TYPE_VAR:  
-        fprintf(stream, "%s", VAL_VAR(elem));
-        break;
-    case TYPE_OP:
-    {
-        switch(VAL_OP(elem))
-        {
-            PUT_PLUS
-            PUT_MUL
-            PUT_SUB
-            PUT_DIV
-            PUT_SIN
-            PUT_COS
-            PUT_LOG
-            PUT_POW
-
-            case UNDEF_OPER_TYPE:
-                fprintf(stream, "?");
-                break;
-            default:
-                fprintf(stream, "#");
-                break;
-        }
-        break;
-    }
-    case TYPE_NUM:
-        fprintf(stream, "%lg", VAL_N(elem));
-        break;
-    case UNDEF_NODE_TYPE:
-        fprintf(stream, "\n");
-        break;
-    default:
-        fprintf(stream, "\t");
-        break;
-    }
 }
 
 void PrintElemInLog(Node_t elem)

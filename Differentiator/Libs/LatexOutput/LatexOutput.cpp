@@ -10,6 +10,8 @@ static void  PrintfInLatexEndDoc();
 
 static void  PrintInLatexStartDoc();
 
+static int   GetOpRank(OPER_TYPES operation);
+
 void PrintfInLatexReal(const char* function, const char *format, ...)
 {
     if (LatexFp == nullptr)
@@ -32,6 +34,28 @@ void PrintRandBundleInLatex()
     PrintfInLatex("%s", BUNDLES[rand() % BUNDLES_NUMBER]);
 }
 
+static int  GetOpRank(OPER_TYPES operation)
+{
+    switch (operation)
+    {
+        case OP_POW:
+        case OP_SIN:
+        case OP_LOG:
+        case OP_COS:
+            return 2;
+        
+        case OP_DIV:
+        case OP_MUL:
+            return 1;
+        
+        case OP_PLUS:
+        case OP_SUB:
+            return 0;
+        
+        default:
+            return -1;
+    }
+}
 
 static void PrintInLatexStartDoc()
 {
@@ -94,20 +118,39 @@ void CloseLatexFile()
 }
 
 void PreFuncTexNode(Node* node, void* useless)
-{
-    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
+{ 
+    if (!IS_OP(node))
+        return;
+
+    bool print_bracket_L = IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))); 
+
+    if (VAL_OP(node) == OP_DIV)
         PrintfInLatex("\\frac{")
-    else if (!IS_NUM(node) && !IS_VAR(node))
-    {
-        if (VAL_OP(node) != OP_SIN && VAL_OP(node) != OP_COS && 
-            VAL_OP(node) != OP_LOG && VAL_OP(node) != OP_POW)
-            PrintfInLatex("(");
-    }
+    else if (print_bracket_L)
+        PrintfInLatex("(");
 }
 
 void PrintElemInLatex(Node* node, void* useless)
 {
     assert(node);
+
+    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
+    {
+        PrintfInLatex("}{")
+        return;
+    }
+    
+    bool print_bracket_L = IS_OP(node) && IS_L_OP(node) &&  \
+                           (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))); 
+
+    if (print_bracket_L)
+        PrintfInLatex(")");
+        
+    if (IS_OP(node) && VAL_OP(node) == OP_POW)
+    {
+        PrintfInLatex("^{");
+        return;
+    }
 
     switch (TYPE(node))
     {
@@ -125,15 +168,15 @@ void PrintElemInLatex(Node* node, void* useless)
                 break;
 
             case OP_SIN:
-                PrintfInLatex("sin(");
+                PrintfInLatex("sin");
                 break;
             
             case OP_COS:
-                PrintfInLatex("cos(");
+                PrintfInLatex("cos");
                 break;
 
             case OP_LOG:
-                PrintfInLatex("log(");
+                PrintfInLatex("log");
                 break;
 
             case OP_POW:
@@ -167,13 +210,29 @@ void PrintElemInLatex(Node* node, void* useless)
         PrintfInLatex("\t");
         break;
     }
+
+    if (!IS_OP(node))
+        return;
+
+    bool print_bracket_R = GetOpRank(VAL_OP(node)) == 2 || \
+                           IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node))));
+    if (print_bracket_R)
+        PrintfInLatex("(");
+
 }
 
 void PostFuncTexNode(Node* node, void* useless)
 {
-    if (IS_OP(node) && (VAL_OP(node) == OP_DIV || VAL_OP(node) == OP_POW))
-        PrintfInLatex("}")
-    else if (!IS_NUM(node) && !IS_VAR(node))
+    if (!IS_OP(node))
+        return;
+    if (VAL_OP(node) == OP_DIV || VAL_OP(node) == OP_POW)
+    {
+        PrintfInLatex("}");
+        return;
+    }
+    bool print_bracket_R = GetOpRank(VAL_OP(node)) == 2 || \
+                           IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node))));
+    if (print_bracket_R)
         PrintfInLatex(")");
 }
 
@@ -182,14 +241,84 @@ void TexNode(Node* root)
     assert(root);
 
     #ifdef DEBUG
-        printf("Start tex node\n");    
+        printf("Start tex node\n");
     #endif
 
     PrintfInLatex("$");
 
-    DFS(root, PreFuncTexNode,   nullptr,
-              PrintElemInLatex, nullptr,
-              PostFuncTexNode,  nullptr);
+    DFS(root, PreFuncTexNode, nullptr, 
+              PrintElemInLatex, nullptr, 
+              PostFuncTexNode, nullptr);
 
     PrintfInLatex("$");
+}
+
+void PrintElemDFS(FILE* stream, Node* node)
+{
+    if (node == nullptr)
+        return;
+
+    bool print_bracket_L = IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))); 
+
+    if (print_bracket_L)
+        fprintf(stream, "(");
+
+    PrintElemDFS(stream, L(node));
+
+    if (print_bracket_L)
+        fprintf(stream, ")");
+
+    PrintElem(node, stream);
+
+
+    bool print_bracket_R = GetOpRank(VAL_OP(node)) == 2 || \
+                           IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node))));
+    if (print_bracket_R)
+        fprintf(stream, "(");
+
+    PrintElemDFS(stream, R(node));
+
+    if (print_bracket_R)
+        fprintf(stream, ")");
+}
+
+void PrintElem(Node* elem, FILE* stream)
+{
+    switch (TYPE(elem))
+    {
+    case TYPE_VAR:  
+        fprintf(stream, "%s", VAL_VAR(elem));
+        break;
+    case TYPE_OP:
+    {
+        switch(VAL_OP(elem))
+        {
+            PUT_PLUS
+            PUT_MUL
+            PUT_SUB
+            PUT_DIV
+            PUT_SIN
+            PUT_COS
+            PUT_LOG
+            PUT_POW
+
+            case UNDEF_OPER_TYPE:
+                fprintf(stream, "?");
+                break;
+            default:
+                fprintf(stream, "#");
+                break;
+        }
+        break;
+    }
+    case TYPE_NUM:
+        fprintf(stream, "%lg", VAL_N(elem));
+        break;
+    case UNDEF_NODE_TYPE:
+        fprintf(stream, "\n");
+        break;
+    default:
+        fprintf(stream, "\t");
+        break;
+    }
 }

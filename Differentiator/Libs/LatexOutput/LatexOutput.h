@@ -19,6 +19,10 @@ void PrintElemInLatex(Node* node, void* useless);
 
 void PostFuncTexNode(Node* node, void* useless);
 
+void PrintElemDFS(FILE* stream, Node* node);
+
+void PrintElem(Node* elem, FILE* stream);
+
 #define PrintfInLatex(format, ...) PrintfInLatexReal(__PRETTY_FUNCTION__, format,##__VA_ARGS__);
 
 #endif
