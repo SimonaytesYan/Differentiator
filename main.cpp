@@ -107,10 +107,8 @@ void CreateChapter5(Tree* tree, Tree* DTree)
 void CreateChapter6(Tree* tree, Tree* Taylor)
 {
     CreateNewList("Глава VI. Разложение функции по формуле Тейлора");
-    PrintfInLatex("Глава в процессе разработки\n");
-
     
-    int    TAYLOR_ORDER = 9;
+    int    TAYLOR_ORDER = 5;
     double TAYLOR_X0    = 0;
     
     /*FILE* fp = fopen(DEFAULT_TREE_NAME, "r");
@@ -120,14 +118,10 @@ void CreateChapter6(Tree* tree, Tree* Taylor)
     printf("Start taylor\n");
     Node* deriv = Diff(tree->root);*/
 
-    GraphicDump(tree);
-
     Taylor->root = TaylorDecomp(tree->root, "x", TAYLOR_X0, TAYLOR_ORDER);
-    printf("End taylot\n");
 
-    GraphicDump(Taylor);
-
-    PrintfInLatex("\\begin{center}\n");
+    PrintfInLatex("\\textbf{\\LARGE{Получим разложение по формуле Тейлора:}}\n")
+    PrintfInLatex("\\begin{center}\n");;
     PrintfInLatex("$y = $");
     TexNode(Taylor->root);
     PrintfInLatex("$ + o(x^{%d})$\n", TAYLOR_ORDER);

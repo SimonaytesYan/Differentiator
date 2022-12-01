@@ -107,6 +107,7 @@ void ConstsConvolution(Node* node)
         assert(1 || "unknown operator");
         break;
     }
+    PrintfInLatex("\\end{center}\n");
     
     TexEqualityWithDesignations(old_node, node, "\\begin{center}", "");
     PrintfInLatex("\\end{center}\n");
