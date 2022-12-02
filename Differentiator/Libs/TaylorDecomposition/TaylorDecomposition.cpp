@@ -2,14 +2,14 @@
 #include "../../Differentiator.h"
 #include "../Simplifying/Simplifying.h"
 
-Node* GetOneTaylorDecMember(Node* derivative, int fact, int number_member,
+Node* GetOneTaylorDecMember(Node* derivative, long long fact, int number_member,
                                    const char* variable, double var_value)
 {
     Node* answer  = NodeCtorOp(OP_MUL);
 
     L(answer)     = NodeCtorOp(OP_DIV);
     LL(answer)    = GetFunctionValueAtPoint(derivative, variable, var_value);
-    LR(answer)    = NodeCtorNum(fact);
+    LR(answer)    = NodeCtorNum((double)fact);
 
     R(answer)     = NodeCtorOp(OP_POW);
     RL(answer)    = NodeCtorOp(OP_SUB);
@@ -24,7 +24,7 @@ Node* GetOneTaylorDecMember(Node* derivative, int fact, int number_member,
     return answer;
 }
 
-Node* TaylorDecomp(Node* function, const char* variable, double var_value, unsigned int dec_order)
+Node* TaylorDecomp(Node* function, const char* variable, double var_value, int dec_order)
 {
     if (dec_order == 0)
         return GetFunctionValueAtPoint(function, variable, var_value); 
@@ -35,7 +35,7 @@ Node* TaylorDecomp(Node* function, const char* variable, double var_value, unsig
     Node**    cur_node   = &(R(root));
     Node*     derivative = function;
     long long fact       = 1;
-    for(long long i = 1; i < dec_order; i++)
+    for(int i = 1; i < dec_order; i++)
     {
         fact       *= i;
         *cur_node   = NodeCtorOp(OP_PLUS);
@@ -52,9 +52,7 @@ Node* TaylorDecomp(Node* function, const char* variable, double var_value, unsig
     fact       *= (long long)dec_order;
     SimplifyNode(derivative);
 
-    printf("Before Taylor\n");
     *cur_node    = GetOneTaylorDecMember(derivative, fact, dec_order, variable, var_value);
-    printf("After Taylor\n");
 
     SimplifyNode(*cur_node);
     
@@ -99,7 +97,8 @@ Node* GetFunctionValueAtPoint(Node* function, const char* variable, double var_v
             }
             break;
         }
-    
+
+        case UNDEF_NODE_TYPE:
         default:
             break;
     }

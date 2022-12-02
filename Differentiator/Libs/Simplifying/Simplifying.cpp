@@ -23,6 +23,9 @@ static int   AnalisNodeForDesignation(Node* node, Node** Designations, int heigh
 
 static void  PrintAllDesignations(Node** Designations);
 
+static void EnterNewDesignation(Node* Designations[], Node* new_designation);
+
+static void DtorDesignations(Node** Designations);
 
 void SimplifyNode(Node* node)
 {
@@ -211,13 +214,16 @@ static void RemoveNeutralElem(Node* node)
         case OP_POW:
             RemoveNeutralPow(node);
             break;
+        case OP_COS:
+        case OP_SIN:
+        case UNDEF_OPER_TYPE:
+        case OP_LOG:
         default:
             break;
     }
 }
 
-
-void EnterNewDesignation(Node* Designations[], Node* new_designation)
+static void EnterNewDesignation(Node* Designations[], Node* new_designation)
 {
     assert(Designations);
 
@@ -236,7 +242,7 @@ void EnterNewDesignation(Node* Designations[], Node* new_designation)
     assert(0 && "Imposible add new Designation, because all elements in Designations arn`t empty");
 }
 
-void DtorDesignations(Node** Designations)
+static void DtorDesignations(Node** Designations)
 {
     assert(Designations);
 
@@ -268,6 +274,8 @@ void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_deco
 
     TexNodeWithDesignationsDFS(node_b, Designations, 0);
     PrintfInLatex("$");
+
+    DtorDesignations(Designations);
 }
 
 static void PrintAllDesignations(Node** Designations)

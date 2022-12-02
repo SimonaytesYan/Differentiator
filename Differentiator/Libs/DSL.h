@@ -80,6 +80,8 @@ const double PRECISION = 1e-6;
 
 #define IS_ONE(node) (IS_NUM(node) && 1 - PRECISION <= VAL_N(node) &&  VAL_N(node) <= 1 + PRECISION)
 
+#define IS_DOUBLE_EQ(x, y) ((-PRECISION <= (x - y)) && ((x - y) <= PRECISION))
+
 
 #define VAL_N(node) node->val.val.dbl
 

@@ -13,11 +13,11 @@ void PrintfInLatexReal(const char* function, const char *format, ...);
 
 void PrintRandBundleInLatex();
 
-void PreFuncTexNode(Node* node, void* useless);
+void PreFuncTexNode(Node* node, void*);
 
-void PrintElemInLatex(Node* node, void* useless);
+void PrintElemInLatex(Node* node, void*);
 
-void PostFuncTexNode(Node* node, void* useless);
+void PostFuncTexNode(Node* node, void*);
 
 void PrintElemDFS(FILE* stream, Node* node);
 

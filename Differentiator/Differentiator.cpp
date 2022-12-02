@@ -14,12 +14,6 @@
 
 static bool  IsNodeConst(Node* node);
 
-static Node* NodeCtorNum(double val);
-
-static Node* NodeCtorVar(char* val);
-
-static Node* NodeCtorOp(OPER_TYPES val);
-
 static Node* DiffDiv(Node* node_arg);
 
 static Node* DiffMult(Node* node_arg);
@@ -43,7 +37,6 @@ static bool IsNodeConst(Node* node)
     if (TYPE(node) == TYPE_VAR)
         return false;
     
-    bool result = true;
     if (!IsNodeConst(L(node)))
         return false;
     if (!IsNodeConst(R(node)))

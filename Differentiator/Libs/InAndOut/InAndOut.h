@@ -22,8 +22,6 @@ int  GetTreeFromFile(Tree* tree, const char file_name[]);
 
 int  SaveTreeInFile(Tree* tree, FILE* fp);
 
-void PrintElemInLog(Node_t elem);
-
 void OutputGraphicDump(Tree* tree);
 
 #endif

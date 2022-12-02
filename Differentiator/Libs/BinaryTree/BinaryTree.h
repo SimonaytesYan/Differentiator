@@ -86,7 +86,7 @@ static int   CmpNode_t(Node_t* a, Node_t* b)
     switch (a->type)
     {
         case TYPE_NUM:
-            return a->val.dbl != b->val.dbl;
+            return !IS_DOUBLE_EQ(a->val.dbl, b->val.dbl);
         case TYPE_OP:
             return a->val.op  != b->val.op;
         case TYPE_VAR:

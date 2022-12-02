@@ -3,7 +3,9 @@
 #include "../LatexOutput/LatexOutput.h"
 #include "../InAndOut/InAndOut.h"
 
-int GraphicCounter()
+static int GraphicCounter();
+
+static int GraphicCounter()
 {
     static int counter = 0;
     counter++;

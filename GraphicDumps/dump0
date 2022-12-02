@@ -1,18 +1,8 @@
 digraph G{
 node[shape = record, fontsize = 14];
 splines = ortho
-info[label = "root = 0x6E1610"]
-Node6E1610[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1610 \n | { <v>OPER | *} | { <l> 6E1590  |<r>  6E15D0}}"]
-Node6E1610 -> Node6E1590[xlabel = "L"]
-Node6E1610 -> Node6E15D0[xlabel = "R"]
-Node6E1590[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1590 \n | { <v>OPER | +} | { <l> 6E1450  |<r>  6E14F0}}"]
-Node6E1590 -> Node6E1450[xlabel = "L"]
-Node6E1590 -> Node6E14F0[xlabel = "R"]
-Node6E1450[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1450 \n | { <v>OPER | sin} | { <l> 000000  |<r>  6E14B0}}"]
-Node6E1450 -> Node6E14B0[xlabel = "R"]
-Node6E14B0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E14B0 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
-Node6E14F0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E14F0 \n | { <v>OPER | cos} | { <l> 000000  |<r>  6E1550}}"]
-Node6E14F0 -> Node6E1550[xlabel = "R"]
-Node6E1550[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E1550 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
-Node6E15D0[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>6E15D0 \n | { <v>NUM | 2.000000} | { <l> 000000  |<r>  000000}}"]
+info[label = "root = 0x000050"]
+Node000050[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000050 \n | { <v>OPER | sin} | { <l> 000000  |<r>  000090}}"]
+Node000050 -> Node000090[xlabel = "R"]
+Node000090[style = "filled,rounded", fillcolor = "#B1FF9F", label = "{<i>000090 \n | { <v>VAR | x } | { <l> 000000  |<r>  000000}}"]
 }

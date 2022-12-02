@@ -12,6 +12,10 @@ static void  PrintInLatexStartDoc();
 
 static int   GetOpRank(OPER_TYPES operation);
 
+static bool PrintBracketL(Node* node);
+
+static bool PrintBracketR(Node* node);
+
 void CreateNewPage(const char* header)
 {
     PrintfInLatex("\\newpage \\textbf{\\LARGE{%s}}\n\n", header);    
@@ -57,6 +61,7 @@ static int  GetOpRank(OPER_TYPES operation)
         case OP_SUB:
             return 0;
         
+        case UNDEF_OPER_TYPE:
         default:
             return -1;
     }
@@ -122,12 +127,12 @@ void CloseLatexFile()
     LatexFp = nullptr;
 }
 
-void PreFuncTexNode(Node* node, void* useless)
+void PreFuncTexNode(Node* node, void* )
 { 
     if (!IS_OP(node))
         return;
 
-    bool print_bracket_L = IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))); 
+    bool print_bracket_L = PrintBracketL(node);
 
     if (VAL_OP(node) == OP_DIV)
         PrintfInLatex("\\frac{")
@@ -135,7 +140,7 @@ void PreFuncTexNode(Node* node, void* useless)
         PrintfInLatex("(");
 }
 
-void PrintElemInLatex(Node* node, void* useless)
+void PrintElemInLatex(Node* node, void*)
 {
     assert(node);
 
@@ -145,8 +150,7 @@ void PrintElemInLatex(Node* node, void* useless)
         return;
     }
     
-    bool print_bracket_L = IS_OP(node) && IS_L_OP(node) &&  \
-                           (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))); 
+    bool print_bracket_L = PrintBracketL(node);
 
     if (print_bracket_L)
         PrintfInLatex(")");
@@ -219,14 +223,12 @@ void PrintElemInLatex(Node* node, void* useless)
     if (!IS_OP(node))
         return;
 
-    bool print_bracket_R = GetOpRank(VAL_OP(node)) == 2 || \
-                           IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node))));
+    bool print_bracket_R = PrintBracketR(node);
     if (print_bracket_R)
         PrintfInLatex("(");
-
 }
 
-void PostFuncTexNode(Node* node, void* useless)
+void PostFuncTexNode(Node* node, void*)
 {
     if (!IS_OP(node))
         return;
@@ -235,8 +237,7 @@ void PostFuncTexNode(Node* node, void* useless)
         PrintfInLatex("}");
         return;
     }
-    bool print_bracket_R = GetOpRank(VAL_OP(node)) == 2 || \
-                           IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node))));
+    bool print_bracket_R = PrintBracketR(node);
     if (print_bracket_R)
         PrintfInLatex(")");
 }
@@ -258,12 +259,23 @@ void TexNode(Node* root)
     PrintfInLatex("$");
 }
 
+static bool PrintBracketL(Node* node)
+{
+    return IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node))));
+}
+
+static bool PrintBracketR(Node* node)
+{
+    return  GetOpRank(VAL_OP(node)) == 2 || \
+                           (IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))));
+}
+
 void PrintElemDFS(FILE* stream, Node* node)
 {
     if (node == nullptr)
         return;
 
-    bool print_bracket_L = IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))); 
+    bool print_bracket_L = PrintBracketL(node);
 
     if (print_bracket_L)
         fprintf(stream, "(");
@@ -276,8 +288,8 @@ void PrintElemDFS(FILE* stream, Node* node)
     PrintElem(node, stream);
 
 
-    bool print_bracket_R = GetOpRank(VAL_OP(node)) == 2 || \
-                           IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node))));
+    bool print_bracket_R = PrintBracketR(node);
+
     if (print_bracket_R)
         fprintf(stream, "(");
 

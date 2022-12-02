@@ -8,7 +8,6 @@
 #include "Differentiator/Libs/TaylorDecomposition/TaylorDecomposition.h"
 #include "Differentiator/Libs/InAndOut/InAndOut.h"
 
-void CreateNewPage(const char* header);
 void CreateChapter1(Tree* tree, FileStruct* file_data);
 void CreateChapter2(Tree* tree);
 void CreateChapter3(Tree* tree, Tree* DTree);
@@ -18,7 +17,7 @@ void CreateChapter6(Tree* tree, Tree* Taylor, FileStruct* file_data);
 
 int main()
 {
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     printf("Start main\n");
     OpenHtmlLogFile("Diff.log");
     OpenLatexFile(DEFAULT_TEX_NAME);

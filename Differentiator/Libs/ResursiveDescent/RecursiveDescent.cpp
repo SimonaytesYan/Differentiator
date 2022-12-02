@@ -34,8 +34,8 @@ const Function_t STD_FUNCTION[] = {
 #define CheckSyntaxError(cond, s)                                                       \
     if (!(cond))                                                                        \
     {                                                                                   \
-        LogPrintf("Syntax error in symbol %d: %s\n", s - FIRST_ELEM_PTR , #cond);       \
-        fprintf(stderr, "Syntax error in symbol %d: %s\n", s - FIRST_ELEM_PTR , #cond); \
+        LogPrintf("Syntax error in symbol %ld: %s\n", s - FIRST_ELEM_PTR , #cond);       \
+        fprintf(stderr, "Syntax error in symbol %ld: %s\n", s - FIRST_ELEM_PTR , #cond); \
         return nullptr;                                                                 \
     }
 
