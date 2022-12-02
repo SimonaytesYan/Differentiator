@@ -79,7 +79,11 @@ void CreateChapter3(Tree* tree, Tree* DTree)
 {
     CreateNewPage("Глава III. Дифференцирование");
 
-    DTree->root = Diff(tree->root);   
+    DTree->root = Diff(tree->root);
+    
+    PrintfInLatex("DUMP\n\n");
+    TexNode(DTree->root);
+    PrintfInLatex("DUMP\n");
 }
 
 void CreateChapter4(Tree* DTree)
@@ -112,6 +116,6 @@ void CreateChapter6(Tree* tree, Tree* Taylor, FileStruct* file_data)
     PrintfInLatex("\\begin{center}\n");;
     PrintfInLatex("$y = $");
     TexNode(Taylor->root);
-    PrintfInLatex("$ + o(x^{%d})$\n", file_data->taylor_order);
+    PrintfInLatex("$ + o((x - %lf)^{%d})$\n", file_data->taylor_x0, file_data->taylor_order);
     PrintfInLatex("\\end{center}");
 }

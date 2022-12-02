@@ -40,7 +40,7 @@ void ConstructGraphInTex(GrahicParam* param)
     fprintf(fp, " lt rgb \"%s\" lw 2\n", param->color);
 
     char comand[100] = "";
-    sprintf(comand, "gnuplot %s", PLOT_PATH);
+    sprintf(comand, "gnuplot %s  smooth bezier", PLOT_PATH);
 
     #ifdef DEBUG
         printf("comand = <%s>\n", comand);
@@ -94,7 +94,7 @@ void ConstructGraphsInTex(int functions_number, GrahicParam* params)
     
     fflush(fp);
     char comand[100] = "";
-    sprintf(comand, "gnuplot %s_%d", PLOT_PATH, graphic_index);
+    sprintf(comand, "gnuplot %s_%d smooth bezier", PLOT_PATH, graphic_index);
 
     system(comand);
     printf("comand = <%s>\n", comand);

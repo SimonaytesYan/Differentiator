@@ -211,6 +211,7 @@ static void WriteNodeAndEdge(Node* node, void* fp_void)
 static void GraphicDump(Tree* tree)
 {
     assert(tree);
+    printf("Graphic dump\n");
 
     char name[30] = "";
     sprintf(name, "GraphicDumps/dump%d", GRAPHIC_DUMP_CNT);

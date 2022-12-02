@@ -65,7 +65,6 @@ void ConstsConvolution(Node* node)
     
     PrintRandBundleInLatex();
 
-    PrintfInLatex("\\begin{center}\n");
     Node* old_node = CpyNode(node);
 
     switch (VAL_OP(node))
@@ -110,7 +109,6 @@ void ConstsConvolution(Node* node)
         assert(1 || "unknown operator");
         break;
     }
-    PrintfInLatex("\\end{center}\n");
     
     TexEqualityWithDesignations(old_node, node, "\\begin{center}", "");
     PrintfInLatex("\\end{center}\n");
@@ -259,9 +257,9 @@ void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_deco
     assert(node_a);
     assert(node_b);
 
-    Node* Designations[MAX_DIS_NUM] = {};
-    AnalisNodeForDesignation(node_a, Designations, 0);
-    AnalisNodeForDesignation(node_b, Designations, 0);
+    Node* Designations[MAX_DIS_NUM] = {};              
+    AnalisNodeForDesignation(node_a, Designations, 0); 
+    AnalisNodeForDesignation(node_b, Designations, 0);                
 
     PrintAllDesignations(Designations);
 
@@ -315,8 +313,8 @@ static int AnalisNodeForDesignation(Node* node, Node** Designations, int height)
 
     if (nnodes_in_subtree > THRESHOLD_ENTER_DESIGNATION && height != 0)
     {
-        EnterNewDesignation(Designations, node);
-        nnodes_in_subtree = 1;        
+        EnterNewDesignation(Designations, CpyNode(node));
+        nnodes_in_subtree = -100;        
     }
 
     return nnodes_in_subtree;

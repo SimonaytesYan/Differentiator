@@ -3,4 +3,4 @@ set output "GraphicDumps/plot.jpg"
 set grid x
 set grid y
 set xrange [-2.000000:2.000000]
-plot sin(x) lt rgb "green" lw 2
+plot 3*cos(x**(3)) lt rgb "green" lw 2

@@ -102,9 +102,9 @@ static void PrintfInLatexEndDoc()
                   "\\newpage"
                   "\\begin{thebibliography}{}\n"
                   "\\bibitem{link1}  \"A Synopsis of Elementary Results in Pure and Applied Mathematics\"\n"
-                  "\\bibitem{link2}  \"Сборник пословиц и поговорок кафедры высшей математики\"\n"
+                  "\\bibitem{link2}  \"Сборник пословиц и поговорок под редацией кафедры высшей математики\"\n"
                   "\\bibitem{link3}  \"Полное собрание лучших высказываний преподавателей МФТИ\"\n"
-                  "\\bibitem{link4}  \"Словарь фраз не несущих смысловой нагрузки кафедры философии. 17 издание\"\n"
+                  "\\bibitem{link4}  \"Словарь фраз, не несущих смысловой нагрузки. 17 издание\"\n"
                   "\\end{thebibliography}"
                   "\\end{document}");
 }
@@ -128,13 +128,10 @@ void CloseLatexFile()
 }
 
 void PreFuncTexNode(Node* node, void* )
-{ 
-    if (!IS_OP(node))
-        return;
-
+{
     bool print_bracket_L = PrintBracketL(node);
-
-    if (VAL_OP(node) == OP_DIV)
+    
+    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
         PrintfInLatex("\\frac{")
     else if (print_bracket_L)
         PrintfInLatex("(");
@@ -220,9 +217,6 @@ void PrintElemInLatex(Node* node, void*)
         break;
     }
 
-    if (!IS_OP(node))
-        return;
-
     bool print_bracket_R = PrintBracketR(node);
     if (print_bracket_R)
         PrintfInLatex("(");
@@ -230,9 +224,7 @@ void PrintElemInLatex(Node* node, void*)
 
 void PostFuncTexNode(Node* node, void*)
 {
-    if (!IS_OP(node))
-        return;
-    if (VAL_OP(node) == OP_DIV || VAL_OP(node) == OP_POW)
+    if (IS_OP(node) && (VAL_OP(node) == OP_DIV || VAL_OP(node) == OP_POW))
     {
         PrintfInLatex("}");
         return;
@@ -261,13 +253,15 @@ void TexNode(Node* root)
 
 static bool PrintBracketL(Node* node)
 {
-    return IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node))));
+    return ( IS_L_NUM(node) && VAL_N(L(node)) < 0) || 
+            IS_OP(node) && IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node))));
 }
 
 static bool PrintBracketR(Node* node)
 {
-    return  GetOpRank(VAL_OP(node)) == 2 || \
-                           (IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))));
+    return (IS_R_NUM(node) && VAL_N(R(node)) < 0)  ||                              \
+       IS_OP(node) && (GetOpRank(VAL_OP(node)) == 2 ||                             \
+       IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))));  \
 }
 
 void PrintElemDFS(FILE* stream, Node* node)

@@ -5,7 +5,6 @@ const double PRECISION = 1e-6;
 
 #define ReturnAndTex                            \
     PrintRandBundleInLatex();                   \
-                                                \
     TexEqualityWithDesignations(node, new_node, \
              "\\begin{center}\n (", ")'\n "); \
                                                 \
@@ -67,6 +66,10 @@ const double PRECISION = 1e-6;
 #define RR(node) (node)->right->right
 
 #define IS_L_OP(node) (L(node) != nullptr && IS_OP(L(node)))
+
+#define IS_L_NUM(node) (L(node) != nullptr && IS_NUM(L(node)))
+
+#define IS_R_NUM(node) (R(node) != nullptr && IS_NUM(R(node)))
 
 #define IS_R_OP(node) (R(node) != nullptr && IS_OP(R(node)))
 
