@@ -63,7 +63,9 @@ static Node* DiffDiv(Node* node)
     RR(new_node) = CpyNode(R(node));
     RL(new_node) = CpyNode(R(node));
 
-    printf("Div\n");
+    #ifdef DEBUG
+        printf("Div\n");
+    #endif
 
     ReturnAndTex;
 }
@@ -81,7 +83,9 @@ static Node* DiffMult(Node* node)
     RL(new_node) = CpyNode(L(node));
     RR(new_node) = Diff(R(node));
     
-    printf("Mult\n");
+    #ifdef DEBUG
+        printf("Mult\n");
+    #endif
 
     ReturnAndTex;
 }
@@ -96,14 +100,15 @@ static Node* DiffSin(Node* node)
     RL(new_node) = nullptr;
     RR(new_node) = CpyNode(R(node));
     
-    printf("Sin\n");
+    #ifdef DEBUG
+        printf("Sin\n");
+    #endif
 
     ReturnAndTex;
 }
 
 static Node* DiffCos(Node* node)
 {
-    printf("Go cos\n");
     Node* new_node = NodeCtorOp(OP_MUL);
 
     L(new_node)  = Diff(R(node));
@@ -115,7 +120,9 @@ static Node* DiffCos(Node* node)
     L(RR(new_node)) = nullptr;
     R(RR(new_node)) = CpyNode(R(node));
     
-    printf("Cos\n");
+    #ifdef DEBUG
+        printf("Cos\n");
+    #endif
 
     ReturnAndTex;
 }
@@ -127,7 +134,9 @@ static Node* DiffSum(Node* node)
     new_node->left  = Diff(L(node));
     new_node->right = Diff(R(node));
     
-    printf("Sum\n");
+    #ifdef DEBUG
+        printf("Sum\n");
+    #endif
 
     ReturnAndTex;
 }
@@ -139,8 +148,9 @@ static Node* DiffSub(Node* node)
     L(new_node) = Diff(L(node));
     R(new_node) = Diff(R(node));
                 
-    printf("Sub\n");
-
+    #ifdef DEBUG
+        printf("Sub\n");
+    #endif
     ReturnAndTex;
 }
 
@@ -154,7 +164,9 @@ static Node* DiffLog(Node* node)
     LR(new_node) = CpyNode(R(node));
     R(new_node)  = Diff(R(node));
     
-    printf("Log\n");
+    #ifdef DEBUG
+        printf("Log\n");
+    #endif
 
     ReturnAndTex;
 }
@@ -220,9 +232,10 @@ static Node* DiffPow(Node* node)
         R(RR(new_node))  = NodeCtorOp(OP_LOG);
         RR(RR(new_node)) = CpyNode(L(node));
     }
-    
-    printf("Pow\n");
 
+    #ifdef DEBUG
+        printf("Pow\n");
+    #endif
     ReturnAndTex;
 }
 

@@ -3,7 +3,7 @@
 #include "RecursiveDescent.h"
 #include "../Logging/Logging.h"
 
-#define DEBUG
+//#define DEBUG
 
 const char* FIRST_ELEM_PTR = nullptr;
 
@@ -242,9 +242,10 @@ Node* GetV(const char** s)
     {
         char* val = (char*)calloc(2, sizeof(char));
         val[0] = **s;
-        (*s)++;
 
         node = NodeCtorVar(val);
+        free(val);
+        (*s)++;
     }
     else
     {

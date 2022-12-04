@@ -48,7 +48,7 @@ static Node* NodeCtorNum(double val);
 
 static Node* NodeCtorOp(OPER_TYPES val);
 
-static Node* NodeCtorVar(char* val);
+static Node* NodeCtorVar(const char* val);
 
 static int   NodeCmp(Node* node_a, Node* node_b);
 
@@ -317,9 +317,7 @@ static int TreeConstructor(Tree* tree, int line, const char* name, const char* f
 {
     LogAndParseErr(tree == nullptr, NULL_TREE_POINTER);
 
-    tree->root           = (Node*)calloc(1, sizeof(Node));
-    tree->root->left     = nullptr;
-    tree->root->right    = nullptr;
+    tree->root           = nullptr;
 
     #ifdef DEBUG
         printf("Ctor(tree.root) = %p\n", tree->root);
@@ -358,13 +356,15 @@ static Node* NodeCtorNum(double val)
     return new_node;
 }
 
-static Node* NodeCtorVar(char* val)
+static Node* NodeCtorVar(const char* val)
 {
     Node* new_node = (Node*)calloc(1, sizeof(Node));
 
     Node_t node_val  = {};
     node_val.type    = TYPE_VAR;
-    node_val.val.var = val;
+
+    node_val.val.var = (char*)calloc(strlen(val) + 1, 1);
+    strcpy(node_val.val.var, val);
 
     NodeCtor(new_node, node_val);
 

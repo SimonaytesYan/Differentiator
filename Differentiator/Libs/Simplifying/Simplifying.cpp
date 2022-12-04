@@ -25,7 +25,6 @@ static void  PrintAllDesignations(Node** Designations);
 
 static void EnterNewDesignation(Node* Designations[], Node* new_designation);
 
-static void DtorDesignations(Node** Designations);
 
 void SimplifyNode(Node* node)
 {
@@ -231,24 +230,14 @@ static void EnterNewDesignation(Node* Designations[], Node* new_designation)
             return;
         if (Designations[i] == nullptr)
         {
-            printf("Add new designation\n");
-
+            #ifdef DEBUG
+                printf("Add new designation\n");
+            #endif
             Designations[i] = new_designation;
             return;
         }
     }
     assert(0 && "Imposible add new Designation, because all elements in Designations arn`t empty");
-}
-
-static void DtorDesignations(Node** Designations)
-{
-    assert(Designations);
-
-    for(int i = 0; i < MAX_DIS_NUM; i++)
-    {
-        if (Designations[i] != nullptr)
-            DeleteNode(Designations[i]);
-    }
 }
 
 void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_decoration[],
@@ -272,8 +261,6 @@ void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_deco
 
     TexNodeWithDesignationsDFS(node_b, Designations, 0);
     PrintfInLatex("$");
-
-    DtorDesignations(Designations);
 }
 
 static void PrintAllDesignations(Node** Designations)
@@ -313,7 +300,7 @@ static int AnalisNodeForDesignation(Node* node, Node** Designations, int height)
 
     if (nnodes_in_subtree > THRESHOLD_ENTER_DESIGNATION && height != 0)
     {
-        EnterNewDesignation(Designations, CpyNode(node));
+        EnterNewDesignation(Designations, node);
         nnodes_in_subtree = -100;        
     }
 
