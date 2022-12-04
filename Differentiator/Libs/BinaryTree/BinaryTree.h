@@ -42,6 +42,8 @@ typedef struct Tree
     LogInfo debug     = {};
 }Tree;
 
+static void EquateNode(Node* node_a, Node* node_b);
+
 static int   NodeCtor(Node* node, Node_t val);
 
 static Node* NodeCtorNum(double val);
@@ -77,6 +79,37 @@ static void  DeleteNode(Node* node);
 static void  DFSNodeDtor(Node* node);
 
 static int   CmpNode_t(Node_t* a, Node_t* b);
+
+static void EquateNode(Node* node_a, Node* node_b)
+{
+    if (TYPE(node_a) == TYPE_VAR)
+        free(VAL_VAR(node_a));
+
+    L(node_a) = L(node_b);
+    R(node_a) = R(node_b);
+
+    TYPE(node_a) = TYPE(node_b);
+
+    switch (TYPE(node_b))
+    {
+    case TYPE_NUM:
+        VAL_N(node_a) = VAL_N(node_b);
+        break;
+    case TYPE_OP:
+        VAL_OP(node_a) = VAL_OP(node_b);
+        break;
+    case TYPE_VAR:
+    {
+        VAL_VAR(node_a) = (char*)calloc(strlen(VAL_VAR(node_b)) + 1, sizeof(char));
+        strcpy(VAL_VAR(node_a), VAL_VAR(node_b));
+        break;
+    }
+    case UNDEF_NODE_TYPE:
+        break;
+    default:
+        break;
+    }
+}
 
 static int   CmpNode_t(Node_t* a, Node_t* b)
 {

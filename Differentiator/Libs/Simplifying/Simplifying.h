@@ -4,7 +4,7 @@
 #include "../TreeSetup.h"
 
 const int   MAX_DIS_NUM                 = 52;
-const int   THRESHOLD_ENTER_DESIGNATION = 14;
+const int   THRESHOLD_ENTER_DESIGNATION = 7;
 
 void  TexNodeWithDesignations(Node* root, const char pre_decoration[]);
 

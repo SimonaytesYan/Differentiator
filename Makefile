@@ -29,29 +29,29 @@ latex_output_windows:
 	g++ -c Differentiator/Libs/LatexOutput/LatexOutput.cpp $(C_FLAGS_WINDOWS) -o Obj/LatexOutput.o
 
 
-linux: differentiator_linux logging_linux construct_graphics_linux recursive_descent_linux latex_output_linux simplifying_linux taylor_dec in_and_out_linux
-	g++ main.cpp Obj/Differentiator.o Obj/Logging.o Obj/ConstructGraphics.o Obj/LatexOutput.o Obj/RecursiveDescent.o Obj/Simplifying.o Obj/TaylorDecomposition.o Obj/InAndOut.o $(C_FLAGS_LINUX) -o Exe/Start.exe
+#linux: differentiator_linux logging_linux construct_graphics_linux recursive_descent_linux latex_output_linux simplifying_linux taylor_dec in_and_out_linux
+#	g++ main.cpp Obj/Differentiator.o Obj/Logging.o Obj/ConstructGraphics.o Obj/LatexOutput.o Obj/RecursiveDescent.o Obj/Simplifying.o Obj/TaylorDecomposition.o Obj/InAndOut.o $(C_FLAGS_LINUX) -o Exe/Start.exe
 
-construct_graphics_linux: latex_output_linux in_and_out_linux
-	g++ -c Differentiator/Libs/ConstructGraphics/ConstructGraphics.cpp Obj/InAndOut.o Obj/LatexOutput.o $(C_FLAGS_LINUX) -o Obj/ConstructGraphics.o
+#construct_graphics_linux: latex_output_linux in_and_out_linux
+#	g++ -c Differentiator/Libs/ConstructGraphics/ConstructGraphics.cpp Obj/InAndOut.o Obj/LatexOutput.o $(C_FLAGS_LINUX) -o Obj/ConstructGraphics.o
 
-in_and_out_linux: recursive_descent_linux latex_output_linux
-	g++ -c Differentiator/Libs/InAndOut/InAndOut.cpp obj/RecursiveDescent.o obj/LatexOutput.o -o Obj/InAndOut.o
+#in_and_out_linux: recursive_descent_linux latex_output_linux
+#	g++ -c Differentiator/Libs/InAndOut/InAndOut.cpp obj/RecursiveDescent.o obj/LatexOutput.o -o Obj/InAndOut.o
 
-recursive_descent_linux:
-	g++ -c Differentiator/Libs/ResursiveDescent/RecursiveDescent.cpp Obj/Differentiator.o Obj/Logging.o $(C_FLAGS_LINUX) -o Obj/RecursiveDescent.o
+#recursive_descent_linux:
+#	g++ -c Differentiator/Libs/ResursiveDescent/RecursiveDescent.cpp Obj/Differentiator.o Obj/Logging.o $(C_FLAGS_LINUX) -o Obj/RecursiveDescent.o
 
-taylor_dec: differentiator_linux simplifying_linux latex_output_linux
-	g++ -c Differentiator/Libs/TaylorDecomposition/TaylorDecomposition.cpp  $(C_FLAGS_LINUX) -o Obj/TaylorDecomposition.o
+#taylor_dec: differentiator_linux simplifying_linux latex_output_linux
+#	g++ -c Differentiator/Libs/TaylorDecomposition/TaylorDecomposition.cpp  $(C_FLAGS_LINUX) -o Obj/TaylorDecomposition.o
 
-differentiator_linux: latex_output_linux simplifying_linux
-	g++ -c Differentiator/Differentiator.cpp Obj/LatexOutput.o Obj/Simplifying.o $(C_FLAGS_LINUX) -o Obj/Differentiator.o
+#differentiator_linux: latex_output_linux simplifying_linux
+#	g++ -c Differentiator/Differentiator.cpp Obj/LatexOutput.o Obj/Simplifying.o $(C_FLAGS_LINUX) -o Obj/Differentiator.o
 
-simplifying_linux: latex_output_linux
-	g++ -c Differentiator/Libs/Simplifying/Simplifying.cpp Obj/LatexOutput.o $(C_FLAGS_LINUX) -o Obj/Simplifying.o
+#simplifying_linux: latex_output_linux
+#	g++ -c Differentiator/Libs/Simplifying/Simplifying.cpp Obj/LatexOutput.o $(C_FLAGS_LINUX) -o Obj/Simplifying.o
 
-logging_linux:
-	g++ -c Differentiator/Libs/Logging/Logging.cpp $(C_FLAGS_LINUX) -o Obj/Logging.o
+#logging_linux:
+#	g++ -c Differentiator/Libs/Logging/Logging.cpp $(C_FLAGS_LINUX) -o Obj/Logging.o
 
-latex_output_linux:
-	g++ -c Differentiator/Libs/LatexOutput/LatexOutput.cpp $(C_FLAGS_LINUX) -o Obj/LatexOutput.o
+#latex_output_linux:
+#	g++ -c Differentiator/Libs/LatexOutput/LatexOutput.cpp $(C_FLAGS_LINUX) -o Obj/LatexOutput.o

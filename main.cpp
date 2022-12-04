@@ -29,6 +29,10 @@ int main()
     TreeCtor(&tree);
     tree.root = GetNodeFromStr(file_data.tree_str);
 
+    FILE* fp = fopen("SaveTree", "w");
+    SaveTreeInFile(&tree, fp);
+    fclose(fp);
+
     CreateChapter1(&tree, &file_data);
     CreateChapter2(&tree);
 

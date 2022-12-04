@@ -3,28 +3,53 @@
 #include "Simplifying.h"
 #include "../LatexOutput/LatexOutput.h"
 
-static void  RemoveNeutralElem(Node* node);
+static void   CpyAndReplace(Node* from_cpy, Node* replace_it);
+ 
+static void   RemoveNeutralElem(Node* node);
+ 
+static void   RemoveNeutralPlus(Node* node);
+ 
+static void   RemoveNeutralSub(Node* node);
+ 
+static void   RemoveNeutralMul(Node* node);
+ 
+static void   RemoveNeutralDiv(Node* node);
+ 
+static void   RemoveNeutralPow(Node* node);
+ 
+static int    GetLetterFromIndes(int index);
+ 
+static void   TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height);
 
-static void  RemoveNeutralPlus(Node* node);
+static double AnalisNodeForDesignation(Node* node, Node** Designations, int height, double coeff,
+                                       int   tree_size);
 
-static void  RemoveNeutralSub(Node* node);
+static void   PrintAllDesignations(Node** Designations);
+ 
+static void   EnterNewDesignation(Node* Designations[], Node* new_designation);
 
-static void  RemoveNeutralMul(Node* node);
+static int    CountNodeNumber(Node* root);
 
-static void  RemoveNeutralDiv(Node* node);
+static int CountNodeNumber(Node* node)
+{
+    if (node == nullptr)
+        return 0;
+    return CountNodeNumber(L(node)) + CountNodeNumber(R(node)) + 1;
+}
 
-static void  RemoveNeutralPow(Node* node);
+static void   CpyAndReplace(Node* from_cpy, Node* replace_it)
+{                                                           
+    PrintRandBundleInLatex();  
+    TexEqualityWithDesignations(replace_it, from_cpy,    
+                                "\\begin{center}\n", "");
+    PrintfInLatex("\\end{center}\n")                     
+    
+    Node* replacement = CpyNode(from_cpy);
 
-static int   GetLetterFromIndes(int index);
-
-static void  TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height);
-
-static int   AnalisNodeForDesignation(Node* node, Node** Designations, int height);
-
-static void  PrintAllDesignations(Node** Designations);
-
-static void EnterNewDesignation(Node* Designations[], Node* new_designation);
-
+    DelLR(replace_it);
+    EquateNode(replace_it, replacement);
+    NodeDtor(replacement);
+}
 
 void SimplifyNode(Node* node)
 {
@@ -78,8 +103,12 @@ void ConstsConvolution(Node* node)
         BinaryConstConv(*);
         break;
     case OP_DIV:
+    {
+        if (IS_DOUBLE_EQ(VAL_N(R(node)), 0))
+            break;
         BinaryConstConv(/);
         break;
+    }
     case OP_SIN:
         UnaryConstConv(sin);
         break;
@@ -87,8 +116,12 @@ void ConstsConvolution(Node* node)
         UnaryConstConv(cos);
         break;
     case OP_LOG:
+    {
+        if (IS_DOUBLE_EQ(VAL_N(R(node)), 0))
+            break;
         UnaryConstConv(log);
         break;
+    }
     case OP_POW:
     {
         double a = VAL_N(L(node));
@@ -120,9 +153,9 @@ static void RemoveNeutralPlus(Node* node)
     assert(node);
 
     if (IS_ZERO(L(node)))
-        CpyAndReplace(R(node), node)
+        CpyAndReplace(R(node), node);
     else if (IS_ZERO(R(node)))
-        CpyAndReplace(L(node), node)
+        CpyAndReplace(L(node), node);
 }
 
 static void RemoveNeutralSub(Node* node)
@@ -130,7 +163,7 @@ static void RemoveNeutralSub(Node* node)
     assert(node);
 
     if (IS_ZERO(R(node)))
-        CpyAndReplace(L(node), node)    
+        CpyAndReplace(L(node), node);
 }
 
 static void RemoveNeutralMul(Node* node)
@@ -141,12 +174,12 @@ static void RemoveNeutralMul(Node* node)
     {
         Node* new_node = NodeCtorNum(0);
         CpyAndReplace(new_node, node);
-        free(new_node);
+        NodeDtor(new_node);
     }
     else if (IS_ONE(L(node))) 
-        CpyAndReplace(R(node), node)
+        CpyAndReplace(R(node), node);
     else if (IS_ONE(R(node)))
-        CpyAndReplace(L(node), node)
+        CpyAndReplace(L(node), node);
 }
 
 static void RemoveNeutralDiv(Node* node)
@@ -154,12 +187,12 @@ static void RemoveNeutralDiv(Node* node)
     assert(node);
 
     if (IS_ONE(R(node)))
-        CpyAndReplace(L(node), node)
+        CpyAndReplace(L(node), node);
     else if (IS_ZERO(L(node)))
     {
         Node* new_node = NodeCtorNum(0);
         CpyAndReplace(new_node, node);
-        free(new_node);
+        NodeDtor(new_node);
     }
 }
 
@@ -172,18 +205,22 @@ static void RemoveNeutralPow(Node* node)
     {
         Node* new_node = NodeCtorNum(1);
         CpyAndReplace(new_node, node);
-        free(new_node);
+        NodeDtor(new_node);
     }
     else if (IS_ZERO(L(node)))
     {
         Node* new_node = NodeCtorNum(0);
         CpyAndReplace(new_node, node);
-        free(new_node);
+        NodeDtor(new_node);
     }
     else if (IS_ONE(R(node)))
-        CpyAndReplace(CpyNode(L(node)), node)
+        CpyAndReplace(L(node), node);
     else if (IS_ZERO(R(node)))
-        CpyAndReplace(NodeCtorNum(1), node);
+    {
+        Node* new_node = NodeCtorNum(1);
+        CpyAndReplace(new_node, node);
+        NodeDtor(new_node);
+    }
 }
 
 static void RemoveNeutralElem(Node* node)
@@ -246,9 +283,9 @@ void TexEqualityWithDesignations(Node* node_a, Node* node_b, const char pre_deco
     assert(node_a);
     assert(node_b);
 
-    Node* Designations[MAX_DIS_NUM] = {};              
-    AnalisNodeForDesignation(node_a, Designations, 0); 
-    AnalisNodeForDesignation(node_b, Designations, 0);                
+    Node* Designations[MAX_DIS_NUM] = {};
+    AnalisNodeForDesignation(node_a, Designations, 0, 1, CountNodeNumber(node_a)); 
+    AnalisNodeForDesignation(node_b, Designations, 0, 1, CountNodeNumber(node_b));
 
     PrintAllDesignations(Designations);
 
@@ -281,27 +318,41 @@ static void PrintAllDesignations(Node** Designations)
     }
 }
 
+static bool ShouldEnternewDesignation(int nnodes_in_subtree, int tree_size, int height)
+{
+    return (nnodes_in_subtree > tree_size/THRESHOLD_ENTER_DESIGNATION && 
+            nnodes_in_subtree > THRESHOLD_ENTER_DESIGNATION           && 
+            height != 0);
+}
+
 //!------------------------------
 //!
 //!@param [in] node node for analis   
 //!@return          number of elements in subtree of given node
 //!-------------------------------
 
-static int AnalisNodeForDesignation(Node* node, Node** Designations, int height)
+static double AnalisNodeForDesignation(Node* node, Node** Designations, int height, double coeff,
+                                       int tree_size)
 {
     if (node == nullptr)
         return 0;
 
-    int nnodes_in_subtree = 0;
-    nnodes_in_subtree += AnalisNodeForDesignation(L(node), Designations, height + 1);
-    nnodes_in_subtree += AnalisNodeForDesignation(R(node), Designations, height + 1);
-    
-    nnodes_in_subtree++;
+    if (IS_OP(node) && VAL_OP(node) == OP_DIV)
+        coeff /= 2;
 
-    if (nnodes_in_subtree > THRESHOLD_ENTER_DESIGNATION && height != 0)
+    double nnodes_in_subtree = 0;
+    nnodes_in_subtree += AnalisNodeForDesignation(L(node), Designations, height + 1, coeff, tree_size);
+
+    if (IS_OP(node) && VAL_OP(node) == OP_POW)
+        coeff /= 2;
+    nnodes_in_subtree += AnalisNodeForDesignation(R(node), Designations, height + 1, coeff, tree_size);
+    
+    nnodes_in_subtree += coeff;
+
+    if (ShouldEnternewDesignation(nnodes_in_subtree, tree_size, height))
     {
         EnterNewDesignation(Designations, node);
-        nnodes_in_subtree = -100;        
+        nnodes_in_subtree = -2*THRESHOLD_ENTER_DESIGNATION;        
     }
 
     return nnodes_in_subtree;
@@ -324,7 +375,7 @@ void TexNodeWithDesignations(Node* root, const char pre_decoration[])
         printf("Start tex node with Designations\n");
     #endif
 
-    AnalisNodeForDesignation(root, Designations, 0);
+    AnalisNodeForDesignation(root, Designations, 0, 1, CountNodeNumber(root));
     PrintAllDesignations(Designations);
 
     PrintfInLatex(pre_decoration);

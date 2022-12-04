@@ -32,26 +32,11 @@ const double PRECISION = 1e-6;
     VAL_N(node) = func(a);              \
 }
 
-#define CpyAndReplace(from_cpy, replace_it)                 \
-{                                                           \
-    PrintRandBundleInLatex();                               \
-    TexEqualityWithDesignations(replace_it, from_cpy,       \
-                                "\\begin{center}\n", "");   \
-    PrintfInLatex("\\end{center}\n")                        \
-                                                            \
-    Node* replacement = CpyNode(from_cpy);                  \
-                                                            \
-    DelLR(replace_it);                                      \
-    *replace_it = *replacement;                             \
-    free(replacement);                                      \
-}
-
 #define DelLR(node)                             \
     DeleteNode(L(node));                        \
     DeleteNode(R(node));                        \
     L(node) = nullptr;                          \
     R(node) = nullptr;
-
 
 #define L(node) (node)->left
 

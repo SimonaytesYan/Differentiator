@@ -48,6 +48,7 @@ static int  GetOpRank(OPER_TYPES operation)
     switch (operation)
     {
         case OP_POW:
+            return 3;
         case OP_SIN:
         case OP_LOG:
         case OP_COS:
@@ -253,15 +254,15 @@ void TexNode(Node* root)
 
 static bool PrintBracketL(Node* node)
 {
-    return ( IS_L_NUM(node) && VAL_N(L(node)) < 0) || 
-            IS_OP(node) && IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node))));
+    return (IS_L_NUM(node) && VAL_N(L(node)) < 0) ||
+            (IS_OP(node) && IS_L_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(L(node)))));
 }
 
 static bool PrintBracketR(Node* node)
 {
     return (IS_R_NUM(node) && VAL_N(R(node)) < 0)  ||                              \
-       IS_OP(node) && (GetOpRank(VAL_OP(node)) == 2 ||                             \
-       IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))));  \
+       (IS_OP(node) && (GetOpRank(VAL_OP(node)) == 2)) ||                             \
+       (IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))));  \
 }
 
 void PrintElemDFS(FILE* stream, Node* node)
@@ -280,7 +281,6 @@ void PrintElemDFS(FILE* stream, Node* node)
         fprintf(stream, ")");
 
     PrintElem(node, stream);
-
 
     bool print_bracket_R = PrintBracketR(node);
 

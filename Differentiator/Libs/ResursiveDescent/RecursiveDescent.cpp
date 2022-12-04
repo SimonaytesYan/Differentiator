@@ -34,8 +34,8 @@ const Function_t STD_FUNCTION[] = {
 #define CheckSyntaxError(cond, s)                                                       \
     if (!(cond))                                                                        \
     {                                                                                   \
-        LogPrintf("Syntax error in symbol %ld: %s\n", s - FIRST_ELEM_PTR , #cond);       \
-        fprintf(stderr, "Syntax error in symbol %ld: %s\n", s - FIRST_ELEM_PTR , #cond); \
+        LogPrintf("Syntax error in symbol %lld: %s\n", s - FIRST_ELEM_PTR , #cond);       \
+        fprintf(stderr, "Syntax error in symbol %lld: %s\n", s - FIRST_ELEM_PTR , #cond); \
         return nullptr;                                                                 \
     }
 
@@ -74,7 +74,9 @@ Node* GetNodeFromStr(const char* str)
     Node* val = GetE(&str);
     if (val == nullptr) return nullptr;
 
-    printf("val = %p\n", val);
+    #ifdef DEBUG
+        printf("val = %p\n", val);
+    #endif
     CheckSyntaxError(*str == ';', str);
 
     return val;
