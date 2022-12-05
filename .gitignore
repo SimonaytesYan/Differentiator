@@ -2,10 +2,12 @@
 *.exe
 *.txt
 *.html
-.vscode
 *.o
 *.tex
 *.jpg
 *.png
 *.jpeg
 *.
+Obj
+Exe
+.vscode
