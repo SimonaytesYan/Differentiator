@@ -260,9 +260,10 @@ static bool PrintBracketL(Node* node)
 
 static bool PrintBracketR(Node* node)
 {
-    return (IS_R_NUM(node) && VAL_N(R(node)) < 0)  ||                              \
-       (IS_OP(node) && (GetOpRank(VAL_OP(node)) == 2)) ||                             \
-       (IS_R_OP(node) && (GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))));  \
+    return (IS_R_NUM(node) && VAL_N(R(node)) < 0)                                   ||                              
+       (IS_OP(node) && (GetOpRank(VAL_OP(node)) == 2))                              ||
+       (IS_R_OP(node) && GetOpRank(VAL_OP(node)) >= GetOpRank(VAL_OP(R(node)))  && 
+                          VAL_OP(node) != OP_MUL && VAL_OP(node) != OP_PLUS);
 }
 
 void PrintElemDFS(FILE* stream, Node* node)

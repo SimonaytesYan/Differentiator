@@ -73,7 +73,7 @@ Node* TaylorDecomp(Node* function, const char* variable, double var_value, int d
     #endif
 
     *cur_node    = GetOneTaylorDecMember(derivative, fact, dec_order, variable, var_value);
-    NodeDtor(derivative);
+    DeleteNode(derivative);
 
     return root;
 }

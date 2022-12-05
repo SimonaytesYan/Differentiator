@@ -18,6 +18,8 @@ static void   RemoveNeutralDiv(Node* node);
 static void   RemoveNeutralPow(Node* node);
  
 static int    GetLetterFromIndes(int index);
+
+static bool   ShouldEnternewDesignation(double nnodes_in_subtree, int tree_size, int height);
  
 static void   TexNodeWithDesignationsDFS(Node* node, Node** Designations, int height);
 
@@ -318,7 +320,7 @@ static void PrintAllDesignations(Node** Designations)
     }
 }
 
-static bool ShouldEnternewDesignation(int nnodes_in_subtree, int tree_size, int height)
+static bool ShouldEnternewDesignation(double nnodes_in_subtree, int tree_size, int height)
 {
     return (nnodes_in_subtree > tree_size/THRESHOLD_ENTER_DESIGNATION && 
             nnodes_in_subtree > THRESHOLD_ENTER_DESIGNATION           && 
@@ -347,7 +349,10 @@ static double AnalisNodeForDesignation(Node* node, Node** Designations, int heig
         coeff /= 2;
     nnodes_in_subtree += AnalisNodeForDesignation(R(node), Designations, height + 1, coeff, tree_size);
     
-    nnodes_in_subtree += coeff;
+
+    nnodes_in_subtree += coeff + coeff*(IS_OP(node) && (VAL_OP(node) == OP_COS ||
+                                                        VAL_OP(node) == OP_SIN ||
+                                                        VAL_OP(node) == OP_LOG));
 
     if (ShouldEnternewDesignation(nnodes_in_subtree, tree_size, height))
     {

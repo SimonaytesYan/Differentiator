@@ -120,6 +120,6 @@ void CreateChapter6(Tree* tree, Tree* Taylor, FileStruct* file_data)
     PrintfInLatex("\\begin{center}\n");;
     PrintfInLatex("$y = $");
     TexNode(Taylor->root);
-    PrintfInLatex("$ + o((x - %lf)^{%d})$\n", file_data->taylor_x0, file_data->taylor_order);
+    PrintfInLatex("$ + o((x - %.2lf)^{%d})$\n", file_data->taylor_x0, file_data->taylor_order);
     PrintfInLatex("\\end{center}");
 }
